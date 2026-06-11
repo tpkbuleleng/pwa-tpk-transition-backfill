@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0f172a" />
     <title>PWA TPK Kabupaten Buleleng</title>
     <link rel="stylesheet" href="./src/styles/app.css" />
   </head>
@@ -13,64 +12,65 @@
       <section class="card hero-card">
         <div class="hero-topline">
           <span id="modeBadge" class="mode-badge">MODE</span>
-          <span id="providerName" class="provider-name">Provider: -</span>
+          <span id="providerLabel" class="provider-label">Provider: -</span>
         </div>
 
         <h1 class="app-title">PWA TPK Kabupaten Buleleng</h1>
-        <p class="app-subtitle">
-          Paket 2 — Data Dictionary &amp; CSV Contract
-        </p>
+        <p class="app-subtitle">Paket 3 — Shared Validation Layer</p>
 
         <div class="info-grid">
-          <div>
-            <span class="label">Arsitektur</span>
+          <div class="info-box">
+            <span class="info-label">Arsitektur</span>
             <strong>Single Codebase, Dual Backend Provider</strong>
           </div>
-          <div>
-            <span class="label">Mode aktif</span>
-            <strong id="activeModeText">-</strong>
+          <div class="info-box">
+            <span class="info-label">Mode aktif</span>
+            <strong id="modeText">-</strong>
           </div>
-          <div>
-            <span class="label">Versi</span>
-            <strong id="appVersionText">-</strong>
+          <div class="info-box">
+            <span class="info-label">Versi</span>
+            <strong id="versionText">-</strong>
           </div>
         </div>
       </section>
 
       <section class="card">
-        <h2 class="section-title">Status Backend</h2>
-        <p class="section-desc">
+        <h2>Status Backend</h2>
+        <p class="section-description">
           Tombol ini menguji apakah UI tetap memanggil backend melalui kontrak provider dari Paket 1.
         </p>
 
         <div class="button-row">
-          <button id="btnHealthCheck" type="button">Cek Backend</button>
-          <button id="btnMutationId" type="button" class="secondary">Generate Client Mutation ID</button>
+          <button id="checkBackendBtn" type="button" class="primary-button">Cek Backend</button>
+          <button id="generateMutationBtn" type="button" class="secondary-button">
+            Generate Client Mutation ID
+          </button>
         </div>
 
-        <pre id="backendStatus" class="status-box">Menyiapkan aplikasi...</pre>
+        <pre id="backendOutput" class="output-box">Belum ada hasil.</pre>
       </section>
 
       <section class="card">
-        <h2 class="section-title">Contract Check Paket 2</h2>
-        <p class="section-desc">
-          Tombol ini menampilkan data dictionary, header Google Sheet staging, header CSV Supabase staging,
-          dan contoh unique key. Ini belum melakukan submit data.
+        <h2>Validation Check Paket 3</h2>
+        <p class="section-description">
+          Tombol ini menguji shared validation layer untuk sasaran dan pendampingan. Validasi ini belum mengirim data ke Google Sheet atau Supabase.
         </p>
 
         <div class="button-row">
-          <button id="btnContractCheck" type="button">Cek Data Dictionary &amp; CSV Contract</button>
+          <button id="checkValidationBtn" type="button" class="primary-button">
+            Cek Shared Validation Layer
+          </button>
         </div>
 
-        <pre id="contractStatus" class="status-box compact">Contract belum dicek.</pre>
+        <pre id="validationOutput" class="output-box">Belum ada hasil.</pre>
       </section>
 
-      <section class="card warning-card">
-        <h2 class="section-title">Catatan Paket 2</h2>
+      <section class="note-card">
+        <h2>Catatan Paket 3</h2>
         <ul>
-          <li>Header Google Sheet dan CSV Supabase dikunci dengan nama kolom snake_case.</li>
-          <li>Form dan validasi detail belum dibuat; itu masuk Paket 3 dan Paket 4.</li>
-          <li>Google Sheet staging belum ditulis oleh aplikasi; append data masuk Paket 5.</li>
+          <li>Validasi dibuat sebagai layer bersama untuk BACKFILL dan PRODUCTION.</li>
+          <li>Validasi ini belum membuat form UI lengkap; form masuk Paket 4.</li>
+          <li>Submit ke Google Sheet staging tetap masuk Paket 5.</li>
           <li>Service worker masih belum diaktifkan agar uji GitHub Pages tidak tertahan cache.</li>
         </ul>
       </section>

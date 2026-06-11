@@ -1,8 +1,5 @@
-tpk-transition-p2-20260612-r1
-
-Paket 2 PASS - Data Dictionary and CSV Contract
-- Lock sasaran and pendampingan field contract
-- Add Google Sheet staging headers
-- Add Supabase staging CSV headers
-- Add import_batch, import_error, and export_log contract
-- Keep backend provider contract from Paket 1 stable
+PWA TPK Kabupaten Buleleng
+Paket 3 — Shared Validation Layer
+Version: tpk-transition-p3-20260612-r1
+Status: Update files only
+Service Worker: Disabled intentionally for GitHub Pages testing

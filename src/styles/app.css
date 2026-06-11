@@ -3,13 +3,16 @@
 :root {
   --bg: #f8fafc;
   --surface: #ffffff;
-  --text: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
+  --text: #020617;
+  --muted: #475569;
+  --border: #dbe4ef;
+  --primary: #0f172a;
+  --button-secondary: #e2e8f0;
   --backfill: #b45309;
   --production: #047857;
-  --danger-surface: #fff7ed;
-  --danger-border: #fed7aa;
+  --code-bg: #0f172a;
+  --note-bg: #fff7ed;
+  --note-border: #fdba74;
 }
 
 * {
@@ -24,22 +27,28 @@ body {
 }
 
 .app-shell {
-  width: min(1040px, 100%);
+  width: min(960px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 24px;
+  padding: 28px 0 48px;
 }
 
-.card {
+.card,
+.note-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 20px;
   padding: 20px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
   margin-bottom: 16px;
 }
 
+.note-card {
+  background: var(--note-bg);
+  border-color: var(--note-border);
+}
+
 .hero-card {
-  padding: 24px;
+  padding: 22px;
 }
 
 .hero-topline {
@@ -51,21 +60,28 @@ body {
 }
 
 .app-title {
-  margin: 0 0 8px;
-  font-size: clamp(24px, 4vw, 34px);
-  line-height: 1.15;
+  margin: 0 0 6px;
+  font-size: clamp(26px, 4vw, 34px);
+  letter-spacing: -0.03em;
 }
 
-.app-subtitle {
-  margin: 0 0 20px;
+.app-subtitle,
+.section-description {
+  margin: 0 0 16px;
   color: var(--muted);
+  line-height: 1.5;
+}
+
+h2 {
+  margin: 0 0 10px;
+  font-size: 18px;
 }
 
 .mode-badge {
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  padding: 7px 12px;
+  padding: 7px 14px;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -80,99 +96,84 @@ body {
   background: var(--production);
 }
 
-.provider-name {
+.provider-label {
+  color: #334155;
   font-size: 13px;
-  color: var(--muted);
 }
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
+  margin-top: 18px;
 }
 
-.info-grid > div {
+.info-box {
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 14px;
   background: #f8fafc;
+  min-height: 88px;
 }
 
-.label {
+.info-label {
   display: block;
+  color: var(--muted);
   font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
-.section-title {
-  margin: 0 0 8px;
-  font-size: 18px;
-}
-
-.section-desc {
-  margin: 0 0 16px;
-  color: var(--muted);
+.info-box strong {
+  display: block;
+  line-height: 1.35;
 }
 
 .button-row {
   display: flex;
-  gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin: 16px 0;
 }
 
 button {
-  appearance: none;
   border: 0;
-  border-radius: 12px;
-  padding: 11px 14px;
-  background: #0f172a;
-  color: #ffffff;
-  font-weight: 700;
+  border-radius: 11px;
+  padding: 11px 16px;
+  font-weight: 800;
   cursor: pointer;
 }
 
-button.secondary {
-  background: #e2e8f0;
-  color: #0f172a;
+.primary-button {
+  background: var(--primary);
+  color: #ffffff;
 }
 
-button:hover {
-  opacity: 0.92;
+.secondary-button {
+  background: var(--button-secondary);
+  color: var(--text);
 }
 
-.status-box {
+.output-box {
   margin: 0;
-  min-height: 120px;
-  max-height: 560px;
-  padding: 14px;
+  padding: 16px;
   border-radius: 14px;
-  background: #0f172a;
-  color: #e2e8f0;
+  background: var(--code-bg);
+  color: #f8fafc;
   overflow: auto;
-  white-space: pre-wrap;
+  max-height: 520px;
+  line-height: 1.6;
   font-size: 13px;
-  line-height: 1.55;
 }
 
-.status-box.compact {
-  min-height: 260px;
-}
-
-.warning-card {
-  background: var(--danger-surface);
-  border-color: var(--danger-border);
-}
-
-.warning-card ul {
-  margin-bottom: 0;
-  padding-left: 20px;
+.note-card ul {
+  padding-left: 22px;
+  margin: 12px 0 0;
+  line-height: 1.5;
 }
 
 @media (max-width: 720px) {
-  .app-shell {
-    padding: 14px;
+  .info-grid {
+    grid-template-columns: 1fr;
   }
 
   .hero-topline {
@@ -180,8 +181,8 @@ button:hover {
     flex-direction: column;
   }
 
-  .info-grid {
-    grid-template-columns: 1fr;
+  .button-row {
+    flex-direction: column;
   }
 
   button {

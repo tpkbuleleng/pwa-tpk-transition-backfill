@@ -1,0 +1,73 @@
+// src/validation/samplePayloads.js
+
+export const VALID_SAMPLE_SASARAN_BADUTA = Object.freeze({
+  client_mutation_id: "reg_20260612010101001_abcd1234",
+  source_mode: "BACKFILL",
+  app_version: "tpk-transition-p3-20260612-r1",
+  id_kecamatan: "TJK",
+  nama_kecamatan: "TEJAKULA",
+  id_tim: "TIM_TJK_001",
+  id_kader: "KDR_TJK_001",
+  id_wilayah: "WIL_TJK_001",
+  desa_kelurahan: "TEJAKULA",
+  dusun_rw: "DUSUN CONTOH",
+  jenis_sasaran: "BADUTA",
+  nama_sasaran: "ANAK CONTOH",
+  jenis_kelamin: "LAKI_LAKI",
+  tanggal_lahir: "2025-01-15",
+  nik: "5108010101010001",
+  no_kk: "5108010101019999",
+  nama_ibu_kandung: "IBU CONTOH",
+});
+
+export const INVALID_SAMPLE_SASARAN = Object.freeze({
+  client_mutation_id: "reg_salah",
+  source_mode: "BACKFILL",
+  app_version: "tpk-transition-p3-20260612-r1",
+  id_kecamatan: "TJK",
+  nama_kecamatan: "TEJAKULA",
+  id_tim: "TIM_TJK_001",
+  id_kader: "KDR_TJK_001",
+  id_wilayah: "WIL_TJK_001",
+  desa_kelurahan: "TEJAKULA",
+  dusun_rw: "DUSUN CONTOH",
+  jenis_sasaran: "BADUTA",
+  nama_sasaran: "ANAK CONTOH",
+  jenis_kelamin: "LAKI_LAKI",
+  tanggal_lahir: "2022-01-15",
+  nik: "12345",
+  no_kk: "98765",
+  nama_ibu_kandung: "IBU CONTOH",
+});
+
+export const VALID_SAMPLE_PENDAMPINGAN = Object.freeze({
+  client_mutation_id: "pdg_20260612010101002_wxyz9876",
+  source_mode: "BACKFILL",
+  app_version: "tpk-transition-p3-20260612-r1",
+  id_kecamatan: "TJK",
+  nama_kecamatan: "TEJAKULA",
+  id_tim: "TIM_TJK_001",
+  id_kader: "KDR_TJK_001",
+  id_wilayah: "WIL_TJK_001",
+  id_sasaran_temp: "SAS_TMP_TJK_0001",
+  jenis_sasaran: "BADUTA",
+  periode_bulan: 1,
+  tahun_laporan: 2026,
+  tanggal_pendampingan: "2026-01-18",
+});
+
+export const INVALID_SAMPLE_PENDAMPINGAN = Object.freeze({
+  client_mutation_id: "pdg_salah",
+  source_mode: "BACKFILL",
+  app_version: "tpk-transition-p3-20260612-r1",
+  id_kecamatan: "TJK",
+  nama_kecamatan: "TEJAKULA",
+  id_tim: "TIM_TJK_001",
+  id_kader: "KDR_TJK_001",
+  id_wilayah: "WIL_TJK_001",
+  id_sasaran_temp: "SAS_TMP_TJK_0001",
+  jenis_sasaran: "BADUTA",
+  periode_bulan: 7,
+  tahun_laporan: 2026,
+  tanggal_pendampingan: "2026-01-18",
+});
