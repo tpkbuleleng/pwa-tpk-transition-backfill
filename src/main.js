@@ -3,6 +3,7 @@
 import { APP_META, APP_MODE } from "./config/appConfig.js";
 import { backend } from "./services/backend.js";
 import { createClientMutationId } from "./utils/clientMutationId.js";
+import { getContractSummary } from "./contracts/contractCheck.js";
 
 function stringify(value) {
   return JSON.stringify(value, null, 2);
@@ -55,6 +56,12 @@ function generateMutationId() {
   setText("backendStatus", stringify(sample));
 }
 
+function checkContract() {
+  const summary = getContractSummary();
+  setText("contractStatus", stringify(summary));
+  console.log("Paket 2 contract summary:", summary);
+}
+
 function boot() {
   document.title = `${APP_META.appName} — ${APP_META.mode}`;
 
@@ -72,7 +79,12 @@ function boot() {
     .getElementById("btnMutationId")
     ?.addEventListener("click", generateMutationId);
 
+  document
+    .getElementById("btnContractCheck")
+    ?.addEventListener("click", checkContract);
+
   testBackendConnection();
+  checkContract();
 }
 
 document.addEventListener("DOMContentLoaded", boot);

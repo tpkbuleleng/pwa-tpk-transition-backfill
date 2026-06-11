@@ -18,7 +18,7 @@
 
         <h1 class="app-title">PWA TPK Kabupaten Buleleng</h1>
         <p class="app-subtitle">
-          Paket 1 — Mode Architecture & Backend Provider Contract
+          Paket 2 — Data Dictionary &amp; CSV Contract
         </p>
 
         <div class="info-grid">
@@ -40,7 +40,7 @@
       <section class="card">
         <h2 class="section-title">Status Backend</h2>
         <p class="section-desc">
-          Tombol ini menguji apakah UI sudah memanggil backend melalui kontrak provider, bukan langsung ke Apps Script atau Supabase.
+          Tombol ini menguji apakah UI tetap memanggil backend melalui kontrak provider dari Paket 1.
         </p>
 
         <div class="button-row">
@@ -51,12 +51,27 @@
         <pre id="backendStatus" class="status-box">Menyiapkan aplikasi...</pre>
       </section>
 
+      <section class="card">
+        <h2 class="section-title">Contract Check Paket 2</h2>
+        <p class="section-desc">
+          Tombol ini menampilkan data dictionary, header Google Sheet staging, header CSV Supabase staging,
+          dan contoh unique key. Ini belum melakukan submit data.
+        </p>
+
+        <div class="button-row">
+          <button id="btnContractCheck" type="button">Cek Data Dictionary &amp; CSV Contract</button>
+        </div>
+
+        <pre id="contractStatus" class="status-box compact">Contract belum dicek.</pre>
+      </section>
+
       <section class="card warning-card">
-        <h2 class="section-title">Catatan Paket 1</h2>
+        <h2 class="section-title">Catatan Paket 2</h2>
         <ul>
-          <li>Service worker belum diaktifkan agar cache tidak mengganggu pengujian awal.</li>
-          <li>SupabaseProvider masih placeholder dan belum boleh dianggap production-ready.</li>
-          <li>Form, validasi detail, dan Google Sheet staging akan dibuat pada paket berikutnya.</li>
+          <li>Header Google Sheet dan CSV Supabase dikunci dengan nama kolom snake_case.</li>
+          <li>Form dan validasi detail belum dibuat; itu masuk Paket 3 dan Paket 4.</li>
+          <li>Google Sheet staging belum ditulis oleh aplikasi; append data masuk Paket 5.</li>
+          <li>Service worker masih belum diaktifkan agar uji GitHub Pages tidak tertahan cache.</li>
         </ul>
       </section>
     </main>

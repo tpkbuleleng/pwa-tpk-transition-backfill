@@ -1,0 +1,1 @@
+error_id,import_batch_id,source_sheet,source_row_number,client_mutation_id,record_type,unique_key,error_level,error_code,error_message,field_name,field_value,raw_row_json,detected_at,resolved_at,resolved_by,resolution_note
