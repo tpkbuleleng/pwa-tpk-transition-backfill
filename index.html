@@ -16,7 +16,7 @@
         </div>
 
         <h1 class="app-title">PWA TPK Kabupaten Buleleng</h1>
-        <p class="app-subtitle">Paket 3 — Shared Validation Layer</p>
+        <p class="app-subtitle">Paket 4 — Shared UI Form</p>
 
         <div class="info-grid">
           <div class="info-box">
@@ -37,7 +37,7 @@
       <section class="card">
         <h2>Status Backend</h2>
         <p class="section-description">
-          Tombol ini menguji apakah UI tetap memanggil backend melalui kontrak provider dari Paket 1.
+          Tombol ini memastikan UI tetap memanggil backend melalui kontrak provider dari Paket 1.
         </p>
 
         <div class="button-row">
@@ -45,33 +45,206 @@
           <button id="generateMutationBtn" type="button" class="secondary-button">
             Generate Client Mutation ID
           </button>
+          <button id="checkContractBtn" type="button" class="secondary-button">
+            Cek Data Dictionary
+          </button>
+          <button id="checkValidationBtn" type="button" class="secondary-button">
+            Cek Validation Layer
+          </button>
         </div>
 
         <pre id="backendOutput" class="output-box">Belum ada hasil.</pre>
       </section>
 
       <section class="card">
-        <h2>Validation Check Paket 3</h2>
+        <h2>Data Konteks Kader / Tim</h2>
         <p class="section-description">
-          Tombol ini menguji shared validation layer untuk sasaran dan pendampingan. Validasi ini belum mengirim data ke Google Sheet atau Supabase.
+          Untuk Paket 4, data konteks masih diisi manual agar payload builder, form, validasi, dan draft lokal bisa diuji tanpa login penuh.
         </p>
 
-        <div class="button-row">
-          <button id="checkValidationBtn" type="button" class="primary-button">
-            Cek Shared Validation Layer
-          </button>
+        <form id="contextForm" class="form-grid" autocomplete="off">
+          <label>
+            <span>ID Kecamatan</span>
+            <input name="id_kecamatan" value="TJK" />
+          </label>
+          <label>
+            <span>Nama Kecamatan</span>
+            <input name="nama_kecamatan" value="TEJAKULA" />
+          </label>
+          <label>
+            <span>ID Tim</span>
+            <input name="id_tim" value="TIM_TJK_001" />
+          </label>
+          <label>
+            <span>ID Kader</span>
+            <input name="id_kader" value="KDR_TJK_001" />
+          </label>
+          <label>
+            <span>ID Wilayah</span>
+            <input name="id_wilayah" value="WIL_TJK_001" />
+          </label>
+          <label>
+            <span>Desa/Kelurahan</span>
+            <input name="desa_kelurahan" value="TEJAKULA" />
+          </label>
+          <label>
+            <span>Dusun/RW</span>
+            <input name="dusun_rw" value="DUSUN CONTOH" />
+          </label>
+        </form>
+      </section>
+
+      <section class="card form-card">
+        <div class="section-header-row">
+          <div>
+            <h2>Form Registrasi Sasaran Awal</h2>
+            <p class="section-description">
+              Form ini memakai payload builder dan shared validation layer. Belum mengirim data ke Google Sheet.
+            </p>
+          </div>
+          <span class="stage-badge">LOCAL DRAFT</span>
         </div>
 
-        <pre id="validationOutput" class="output-box">Belum ada hasil.</pre>
+        <form id="sasaranForm" class="form-grid" autocomplete="off">
+          <label>
+            <span>Client Mutation ID</span>
+            <input name="client_mutation_id" readonly placeholder="Otomatis dibuat saat preview" />
+          </label>
+          <label>
+            <span>Jenis Sasaran</span>
+            <select name="jenis_sasaran" data-options="jenisSasaran"></select>
+          </label>
+          <label>
+            <span>Nama Sasaran</span>
+            <input name="nama_sasaran" placeholder="Contoh: ANAK CONTOH" />
+          </label>
+          <label>
+            <span>Jenis Kelamin</span>
+            <select name="jenis_kelamin" data-options="jenisKelamin"></select>
+          </label>
+          <label>
+            <span>Tanggal Lahir</span>
+            <input name="tanggal_lahir" type="date" />
+          </label>
+          <label>
+            <span>NIK</span>
+            <input name="nik" inputmode="numeric" maxlength="16" placeholder="16 digit" />
+          </label>
+          <label>
+            <span>No. KK</span>
+            <input name="no_kk" inputmode="numeric" maxlength="16" placeholder="16 digit" />
+          </label>
+          <label>
+            <span>Nama Ibu Kandung</span>
+            <input name="nama_ibu_kandung" placeholder="Wajib untuk fallback unique key" />
+          </label>
+          <label>
+            <span>Nama Pasangan</span>
+            <input name="nama_pasangan" placeholder="Wajib jika CATIN" />
+          </label>
+          <label>
+            <span>No. HP</span>
+            <input name="no_hp" inputmode="tel" />
+          </label>
+          <label class="span-2">
+            <span>Alamat Lengkap</span>
+            <textarea name="alamat_lengkap" rows="2"></textarea>
+          </label>
+          <label class="span-2">
+            <span>Catatan Backfill</span>
+            <textarea name="catatan_backfill" rows="2"></textarea>
+          </label>
+        </form>
+
+        <div class="button-row">
+          <button id="fillSasaranSampleBtn" type="button" class="secondary-button">Isi Contoh Valid</button>
+          <button id="previewSasaranBtn" type="button" class="primary-button">Preview & Validasi Sasaran</button>
+          <button id="saveSasaranDraftBtn" type="button" class="secondary-button">Simpan Draft</button>
+          <button id="loadSasaranDraftBtn" type="button" class="secondary-button">Muat Draft</button>
+          <button id="deleteSasaranDraftBtn" type="button" class="danger-button">Hapus Draft</button>
+        </div>
+
+        <div id="sasaranStatus" class="status-panel muted-panel">Belum ada validasi.</div>
+        <pre id="sasaranOutput" class="output-box compact-output">Belum ada payload.</pre>
+      </section>
+
+      <section class="card form-card">
+        <div class="section-header-row">
+          <div>
+            <h2>Form Pendampingan Backfill</h2>
+            <p class="section-description">
+              Form ini mengunci periode Januari–Juni 2026 dan validasi tanggal sesuai bulan laporan.
+            </p>
+          </div>
+          <span class="stage-badge">LOCAL DRAFT</span>
+        </div>
+
+        <form id="pendampinganForm" class="form-grid" autocomplete="off">
+          <label>
+            <span>Client Mutation ID</span>
+            <input name="client_mutation_id" readonly placeholder="Otomatis dibuat saat preview" />
+          </label>
+          <label>
+            <span>ID Sasaran Temp</span>
+            <input name="id_sasaran_temp" placeholder="Contoh: SAS_TMP_TJK_0001" />
+          </label>
+          <label>
+            <span>ID Sasaran Production</span>
+            <input name="id_sasaran" placeholder="Kosongkan saat backfill awal" />
+          </label>
+          <label>
+            <span>Jenis Sasaran</span>
+            <select name="jenis_sasaran" data-options="jenisSasaran"></select>
+          </label>
+          <label>
+            <span>Periode Bulan</span>
+            <select name="periode_bulan" data-options="bulanBackfill"></select>
+          </label>
+          <label>
+            <span>Tahun Laporan</span>
+            <input name="tahun_laporan" value="2026" inputmode="numeric" />
+          </label>
+          <label>
+            <span>Tanggal Pendampingan</span>
+            <input name="tanggal_pendampingan" type="date" />
+          </label>
+          <label>
+            <span>Status Pendampingan</span>
+            <select name="status_pendampingan" data-options="statusPendampingan"></select>
+          </label>
+          <label>
+            <span>Jumlah Laporan Kader Bulan Ini</span>
+            <input name="existing_count_for_kader_month" value="0" inputmode="numeric" />
+          </label>
+          <label class="span-2">
+            <span>Hasil Pendampingan</span>
+            <textarea name="hasil_pendampingan" rows="2"></textarea>
+          </label>
+          <label class="span-2">
+            <span>Catatan Pendampingan</span>
+            <textarea name="catatan_pendampingan" rows="2"></textarea>
+          </label>
+        </form>
+
+        <div class="button-row">
+          <button id="fillPendampinganSampleBtn" type="button" class="secondary-button">Isi Contoh Valid</button>
+          <button id="previewPendampinganBtn" type="button" class="primary-button">Preview & Validasi Pendampingan</button>
+          <button id="savePendampinganDraftBtn" type="button" class="secondary-button">Simpan Draft</button>
+          <button id="loadPendampinganDraftBtn" type="button" class="secondary-button">Muat Draft</button>
+          <button id="deletePendampinganDraftBtn" type="button" class="danger-button">Hapus Draft</button>
+        </div>
+
+        <div id="pendampinganStatus" class="status-panel muted-panel">Belum ada validasi.</div>
+        <pre id="pendampinganOutput" class="output-box compact-output">Belum ada payload.</pre>
       </section>
 
       <section class="note-card">
-        <h2>Catatan Paket 3</h2>
+        <h2>Catatan Paket 4</h2>
         <ul>
-          <li>Validasi dibuat sebagai layer bersama untuk BACKFILL dan PRODUCTION.</li>
-          <li>Validasi ini belum membuat form UI lengkap; form masuk Paket 4.</li>
-          <li>Submit ke Google Sheet staging tetap masuk Paket 5.</li>
-          <li>Service worker masih belum diaktifkan agar uji GitHub Pages tidak tertahan cache.</li>
+          <li>Form sudah memakai payload builder dan shared validation layer.</li>
+          <li>Draft disimpan lokal di browser memakai localStorage.</li>
+          <li>Belum ada append ke Google Sheet; itu masuk Paket 5.</li>
+          <li>Belum ada service worker agar uji GitHub Pages tidak tertahan cache.</li>
         </ul>
       </section>
     </main>
