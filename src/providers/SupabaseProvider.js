@@ -44,6 +44,10 @@ export class SupabaseProvider extends BackendProvider {
     return this.notReady("setupStagingSheets");
   }
 
+  getWorkbookRoute(_payload = {}) {
+    return this.notReady("getWorkbookRoute");
+  }
+
   submitRegistrasi(_payload) {
     return this.notReady("submitRegistrasi");
   }

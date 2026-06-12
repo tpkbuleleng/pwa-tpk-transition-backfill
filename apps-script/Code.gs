@@ -1,6 +1,6 @@
 /**
  * PWA TPK Kabupaten Buleleng
- * Paket 5 — Apps Script Provider & Sheet Staging
+ * Paket 5-R1 — Central Apps Script Router & Workbook Routing Lock
  *
  * Fungsi utama:
  * - healthCheck
@@ -9,27 +9,49 @@
  * - submitPendampingan    -> append staging_pendampingan_jan/feb/mar/apr/mei/jun
  * - getSubmitStatus       -> cek client_mutation_id di sheet staging
  *
- * Cara pakai paling aman:
- * 1. Buka Google Sheet BACKFILL_TPK_TJK.
- * 2. Extensions -> Apps Script.
- * 3. Paste seluruh isi file ini ke Code.gs.
+ * Cara pakai final yang direkomendasikan:
+ * 1. Buat Apps Script standalone bernama TPK Backfill Router.
+ * 2. Paste seluruh isi file ini ke Code.gs.
+ * 3. Isi spreadsheetId pada BACKFILL_WORKBOOK_ROUTES untuk setiap kecamatan.
  * 4. Deploy -> Web app.
  * 5. Execute as: Me.
  * 6. Who has access: Anyone.
- * 7. Copy URL Web App ke src/config/backendConfig.js.
+ * 7. Copy URL Web App pusat ke src/config/backendConfig.js.
+ *
+ * Cara uji cepat TJK:
+ * - File ini tetap bisa ditempel pada Apps Script yang terikat workbook BACKFILL_TPK_TJK.
+ * - Fallback active spreadsheet hanya untuk uji, bukan pola final 9 kecamatan.
  */
 
-const APP_BACKEND_VERSION = 'gas-backfill-provider-p5-20260612-r1';
+const APP_BACKEND_VERSION = 'gas-backfill-router-p5-r1-20260612-r1';
 
 /**
- * Jika Apps Script dibuat langsung dari Google Sheet melalui Extensions -> Apps Script,
- * biarkan kosong.
+ * Paket 5-R1 menggunakan 1 Apps Script pusat sebagai ROUTER.
+ * Frontend hanya memakai 1 URL Apps Script. Router memilih workbook tujuan
+ * berdasarkan kode_kecamatan / id_kecamatan pada payload.
  *
- * Jika memakai Apps Script standalone, isi dengan Spreadsheet ID BACKFILL_TPK_TJK.
- * Contoh:
- * const BACKFILL_SPREADSHEET_ID = '1abcDEFxxxxx';
+ * WAJIB DIISI sebelum operasional 9 kecamatan:
+ * - Masukkan Spreadsheet ID masing-masing workbook BACKFILL_TPK_*.
+ * - Untuk uji awal TJK, minimal isi spreadsheetId pada kode TJK.
+ *
+ * Catatan aman:
+ * - Jika script masih ditempel melalui Extensions -> Apps Script di workbook BACKFILL_TPK_TJK,
+ *   fallback active spreadsheet tetap diizinkan untuk uji.
+ * - Untuk router pusat final, buat Apps Script standalone dan isi semua spreadsheetId.
  */
-const BACKFILL_SPREADSHEET_ID = '';
+const ALLOW_BOUND_SPREADSHEET_FALLBACK_FOR_TEST = true;
+
+const BACKFILL_WORKBOOK_ROUTES = Object.freeze({
+  GRK: { spreadsheetId: '', spreadsheetName: 'BACKFILL_TPK_GRK', namaKecamatan: 'GEROKGAK', isActive: true },
+  SRT: { spreadsheetId: '', spreadsheetName: 'BACKFILL_TPK_SRT', namaKecamatan: 'SERIRIT', isActive: true },
+  BSB: { spreadsheetId: '', spreadsheetName: 'BACKFILL_TPK_BSB', namaKecamatan: 'BUSUNGBIU', isActive: true },
+  BJR: { spreadsheetId: '', spreadsheetName: 'BACKFILL_TPK_BJR', namaKecamatan: 'BANJAR', isActive: true },
+  BLL: { spreadsheetId: '', spreadsheetName: 'BACKFILL_TPK_BLL', namaKecamatan: 'BULELENG', isActive: true },
+  SKS: { spreadsheetId: '', spreadsheetName: 'BACKFILL_TPK_SKS', namaKecamatan: 'SUKASADA', isActive: true },
+  SWN: { spreadsheetId: '', spreadsheetName: 'BACKFILL_TPK_SWN', namaKecamatan: 'SAWAN', isActive: true },
+  KBT: { spreadsheetId: '', spreadsheetName: 'BACKFILL_TPK_KBT', namaKecamatan: 'KUBUTAMBAHAN', isActive: true },
+  TJK: { spreadsheetId: '', spreadsheetName: 'BACKFILL_TPK_TJK', namaKecamatan: 'TEJAKULA', isActive: true },
+});
 
 const BACKFILL_YEAR = 2026;
 const BACKFILL_MONTH_START = 1;
@@ -231,6 +253,9 @@ function doPost(e) {
       case 'setupStagingSheets':
         return jsonResponse_(handleSetupStagingSheets_(payload, meta));
 
+      case 'getWorkbookRoute':
+        return jsonResponse_(handleGetWorkbookRoute_(payload, meta));
+
       case 'submitRegistrasi':
         return jsonResponse_(handleSubmitRegistrasi_(payload, meta));
 
@@ -246,8 +271,8 @@ function doPost(e) {
       case 'submitBatch':
         return jsonResponse_(errorResponse_({
           status: 'not_implemented',
-          code: 'ACTION_NOT_IMPLEMENTED_IN_PACKAGE_5',
-          message: 'Action ' + action + ' belum diimplementasikan pada Paket 5.',
+          code: 'ACTION_NOT_IMPLEMENTED_IN_PACKAGE_5_R1',
+          message: 'Action ' + action + ' belum diimplementasikan pada Paket 5-R1.',
           detail: { action: action },
           meta: buildMeta_(meta, action),
         }));
@@ -276,27 +301,22 @@ function doPost(e) {
 }
 
 function handleHealthCheck_(payload, meta) {
-  let spreadsheetInfo = null;
+  const routeSummary = buildRouteSummary_();
+  let requestedRoute = null;
 
-  try {
-    const ss = getSpreadsheet_();
-    spreadsheetInfo = {
-      spreadsheet_id: ss.getId(),
-      spreadsheet_name: ss.getName(),
-      sheet_count: ss.getSheets().length,
-    };
-  } catch (err) {
-    spreadsheetInfo = {
-      error: err && err.message ? err.message : String(err),
-    };
+  if (payload && (payload.kode_kecamatan || payload.id_kecamatan)) {
+    const routeResult = resolveWorkbookRoute_(payload, { allowSpreadsheetOpen: true });
+    requestedRoute = routeResult.ok ? routeResult.route_info : routeResult.error;
   }
 
   return successResponse_({
-    message: 'Apps Script BACKFILL Paket 5 endpoint sehat.',
+    message: 'Apps Script BACKFILL Router Paket 5-R1 endpoint sehat.',
     data: {
       received_payload: payload || {},
       server_time: new Date().toISOString(),
-      spreadsheet: spreadsheetInfo,
+      router_mode: 'CENTRAL_ROUTER',
+      configured_routes: routeSummary,
+      requested_route: requestedRoute,
     },
     meta: buildMeta_(meta, 'healthCheck'),
   });
@@ -307,12 +327,44 @@ function handleSetupStagingSheets_(payload, meta) {
   lock.waitLock(30000);
 
   try {
-    const ss = getSpreadsheet_();
-    const result = setupStagingSheets_(ss);
+    if (payload && payload.setup_all === true) {
+      const results = [];
+      const routeKeys = Object.keys(BACKFILL_WORKBOOK_ROUTES);
+
+      routeKeys.forEach(function (code) {
+        const route = BACKFILL_WORKBOOK_ROUTES[code];
+        if (!route || route.isActive === false || !route.spreadsheetId) return;
+        const ss = SpreadsheetApp.openById(route.spreadsheetId);
+        const setup = setupStagingSheets_(ss);
+        results.push({ route_code: code, route: routePublicInfo_(code, route, 'CONFIGURED_ID'), setup: setup });
+      });
+
+      return successResponse_({
+        message: 'Setup sheet staging semua route aktif selesai diproses.',
+        data: {
+          router_mode: 'CENTRAL_ROUTER',
+          setup_all: true,
+          total_processed: results.length,
+          results: results,
+        },
+        meta: buildMeta_(meta, 'setupStagingSheets'),
+      });
+    }
+
+    const routeResult = resolveWorkbookRoute_(payload || {}, { allowSpreadsheetOpen: true });
+    if (!routeResult.ok) {
+      return routeErrorResponse_(routeResult, meta, 'setupStagingSheets');
+    }
+
+    const result = setupStagingSheets_(routeResult.spreadsheet);
 
     return successResponse_({
-      message: 'Sheet staging berhasil disiapkan.',
-      data: result,
+      message: 'Sheet staging berhasil disiapkan melalui router pusat.',
+      data: {
+        router_mode: 'CENTRAL_ROUTER',
+        route: routeResult.route_info,
+        setup: result,
+      },
       meta: buildMeta_(meta, 'setupStagingSheets'),
     });
   } finally {
@@ -320,12 +372,34 @@ function handleSetupStagingSheets_(payload, meta) {
   }
 }
 
+function handleGetWorkbookRoute_(payload, meta) {
+  const routeResult = resolveWorkbookRoute_(payload || {}, { allowSpreadsheetOpen: false });
+
+  if (!routeResult.ok) {
+    return routeErrorResponse_(routeResult, meta, 'getWorkbookRoute');
+  }
+
+  return successResponse_({
+    message: 'Route workbook ditemukan.',
+    data: {
+      router_mode: 'CENTRAL_ROUTER',
+      route: routeResult.route_info,
+    },
+    meta: buildMeta_(meta, 'getWorkbookRoute'),
+  });
+}
+
 function handleSubmitRegistrasi_(payload, meta) {
   const lock = LockService.getScriptLock();
   lock.waitLock(30000);
 
   try {
-    const ss = getSpreadsheet_();
+    const routeResult = resolveWorkbookRoute_(payload, { allowSpreadsheetOpen: true });
+    if (!routeResult.ok) {
+      return routeErrorResponse_(routeResult, meta, 'submitRegistrasi');
+    }
+
+    const ss = routeResult.spreadsheet;
     setupStagingSheets_(ss);
 
     const validation = validateSasaranBackend_(payload);
@@ -345,7 +419,7 @@ function handleSubmitRegistrasi_(payload, meta) {
         code: validation.error_code,
         message: validation.message,
         detail: { issues: validation.issues },
-        meta: buildMeta_(meta, 'submitRegistrasi'),
+        meta: buildMeta_(meta, 'submitRegistrasi', routeResult.route_info),
       });
     }
 
@@ -358,7 +432,7 @@ function handleSubmitRegistrasi_(payload, meta) {
         rowNumber: duplicateMutation.rowNumber,
         recordType: 'sasaran',
         clientMutationId: payload.client_mutation_id,
-        meta: buildMeta_(meta, 'submitRegistrasi'),
+        meta: buildMeta_(meta, 'submitRegistrasi', routeResult.route_info),
       });
     }
 
@@ -373,7 +447,7 @@ function handleSubmitRegistrasi_(payload, meta) {
           row_number: duplicateUniqueKey.rowNumber,
           sasaran_unique_key: payload.sasaran_unique_key,
         },
-        meta: buildMeta_(meta, 'submitRegistrasi'),
+        meta: buildMeta_(meta, 'submitRegistrasi', routeResult.route_info),
       });
     }
 
@@ -384,13 +458,15 @@ function handleSubmitRegistrasi_(payload, meta) {
       message: 'Registrasi sasaran berhasil disimpan ke staging_sasaran.',
       data: {
         record_type: 'sasaran',
+        route_code: routeResult.route_info.route_code,
+        spreadsheet_name: routeResult.route_info.spreadsheet_name,
         sheet_name: STAGING_SHEET_NAMES.SASARAN,
         row_number: appendResult.row_number,
         record_id: rowObject.record_id,
         client_mutation_id: payload.client_mutation_id,
         sasaran_unique_key: payload.sasaran_unique_key,
       },
-      meta: buildMeta_(meta, 'submitRegistrasi'),
+      meta: buildMeta_(meta, 'submitRegistrasi', routeResult.route_info),
     });
   } finally {
     lock.releaseLock();
@@ -402,7 +478,12 @@ function handleSubmitPendampingan_(payload, meta) {
   lock.waitLock(30000);
 
   try {
-    const ss = getSpreadsheet_();
+    const routeResult = resolveWorkbookRoute_(payload, { allowSpreadsheetOpen: true });
+    if (!routeResult.ok) {
+      return routeErrorResponse_(routeResult, meta, 'submitPendampingan');
+    }
+
+    const ss = routeResult.spreadsheet;
     setupStagingSheets_(ss);
 
     const validation = validatePendampinganBackend_(payload);
@@ -424,7 +505,7 @@ function handleSubmitPendampingan_(payload, meta) {
         code: validation.error_code,
         message: validation.message,
         detail: { issues: validation.issues },
-        meta: buildMeta_(meta, 'submitPendampingan'),
+        meta: buildMeta_(meta, 'submitPendampingan', routeResult.route_info),
       });
     }
 
@@ -438,7 +519,7 @@ function handleSubmitPendampingan_(payload, meta) {
         rowNumber: duplicateMutation.rowNumber,
         recordType: 'pendampingan',
         clientMutationId: payload.client_mutation_id,
-        meta: buildMeta_(meta, 'submitPendampingan'),
+        meta: buildMeta_(meta, 'submitPendampingan', routeResult.route_info),
       });
     }
 
@@ -453,7 +534,7 @@ function handleSubmitPendampingan_(payload, meta) {
           row_number: duplicateUniqueKey.rowNumber,
           pendampingan_unique_key: payload.pendampingan_unique_key,
         },
-        meta: buildMeta_(meta, 'submitPendampingan'),
+        meta: buildMeta_(meta, 'submitPendampingan', routeResult.route_info),
       });
     }
 
@@ -475,7 +556,7 @@ function handleSubmitPendampingan_(payload, meta) {
           existing_count: countForKader,
           max: MAX_REPORT_PER_KADER_PER_MONTH,
         },
-        meta: buildMeta_(meta, 'submitPendampingan'),
+        meta: buildMeta_(meta, 'submitPendampingan', routeResult.route_info),
       });
     }
 
@@ -486,13 +567,15 @@ function handleSubmitPendampingan_(payload, meta) {
       message: 'Pendampingan berhasil disimpan ke ' + sheetName + '.',
       data: {
         record_type: 'pendampingan',
+        route_code: routeResult.route_info.route_code,
+        spreadsheet_name: routeResult.route_info.spreadsheet_name,
         sheet_name: sheetName,
         row_number: appendResult.row_number,
         record_id: rowObject.record_id,
         client_mutation_id: payload.client_mutation_id,
         pendampingan_unique_key: payload.pendampingan_unique_key,
       },
-      meta: buildMeta_(meta, 'submitPendampingan'),
+      meta: buildMeta_(meta, 'submitPendampingan', routeResult.route_info),
     });
   } finally {
     lock.releaseLock();
@@ -500,7 +583,12 @@ function handleSubmitPendampingan_(payload, meta) {
 }
 
 function handleGetSubmitStatus_(payload, meta) {
-  const ss = getSpreadsheet_();
+  const routeResult = resolveWorkbookRoute_(payload || {}, { allowSpreadsheetOpen: true });
+  if (!routeResult.ok) {
+    return routeErrorResponse_(routeResult, meta, 'getSubmitStatus');
+  }
+
+  const ss = routeResult.spreadsheet;
   setupStagingSheets_(ss);
 
   const clientMutationId = text_(payload.client_mutation_id);
@@ -973,17 +1061,144 @@ function getPendampinganSheetName_(month) {
   return map[Number(month)] || null;
 }
 
-function getSpreadsheet_() {
-  if (BACKFILL_SPREADSHEET_ID) {
-    return SpreadsheetApp.openById(BACKFILL_SPREADSHEET_ID);
+function buildRouteSummary_() {
+  return Object.keys(BACKFILL_WORKBOOK_ROUTES).map(function (code) {
+    const route = BACKFILL_WORKBOOK_ROUTES[code];
+    return {
+      route_code: code,
+      spreadsheet_name: route.spreadsheetName,
+      nama_kecamatan: route.namaKecamatan,
+      is_active: route.isActive !== false,
+      spreadsheet_id_configured: Boolean(route.spreadsheetId),
+    };
+  });
+}
+
+function resolveWorkbookRoute_(payload, options) {
+  options = options || {};
+  const allowSpreadsheetOpen = options.allowSpreadsheetOpen !== false;
+  const rawCode = text_(payload.kode_kecamatan || payload.id_kecamatan || payload.kecamatan || payload.route_code);
+  const routeCode = normalizeKecamatanCode_(rawCode);
+
+  if (!routeCode) {
+    return {
+      ok: false,
+      error: {
+        code: 'ROUTE_CODE_REQUIRED',
+        message: 'kode_kecamatan atau id_kecamatan wajib diisi agar router dapat memilih workbook tujuan.',
+        detail: { received: payload || {} },
+      },
+    };
   }
 
-  const active = SpreadsheetApp.getActiveSpreadsheet();
-  if (!active) {
-    throw new Error('Spreadsheet aktif tidak ditemukan. Jika memakai Apps Script standalone, isi BACKFILL_SPREADSHEET_ID di Code.gs.');
+  const route = BACKFILL_WORKBOOK_ROUTES[routeCode];
+  if (!route || route.isActive === false) {
+    return {
+      ok: false,
+      error: {
+        code: 'UNKNOWN_OR_INACTIVE_KECAMATAN_ROUTE',
+        message: 'Route workbook untuk kode kecamatan tidak dikenal atau tidak aktif: ' + routeCode,
+        detail: { route_code: routeCode, available_routes: buildRouteSummary_() },
+      },
+    };
   }
 
-  return active;
+  const nameMismatch = validateRouteNameMismatch_(route, payload);
+  if (nameMismatch) {
+    return {
+      ok: false,
+      error: {
+        code: 'KECAMATAN_ROUTE_MISMATCH',
+        message: 'nama_kecamatan payload tidak sesuai dengan route workbook ' + routeCode + '.',
+        detail: nameMismatch,
+      },
+    };
+  }
+
+  let spreadsheet = null;
+  let routeMode = route.spreadsheetId ? 'CONFIGURED_ID' : 'NOT_CONFIGURED';
+
+  if (allowSpreadsheetOpen) {
+    if (route.spreadsheetId) {
+      spreadsheet = SpreadsheetApp.openById(route.spreadsheetId);
+    } else if (ALLOW_BOUND_SPREADSHEET_FALLBACK_FOR_TEST) {
+      const active = SpreadsheetApp.getActiveSpreadsheet();
+      if (active) {
+        spreadsheet = active;
+        routeMode = 'BOUND_FALLBACK_FOR_TEST';
+      }
+    }
+
+    if (!spreadsheet) {
+      return {
+        ok: false,
+        error: {
+          code: 'WORKBOOK_ROUTE_SPREADSHEET_ID_MISSING',
+          message: 'Spreadsheet ID untuk route ' + routeCode + ' belum diisi di BACKFILL_WORKBOOK_ROUTES.',
+          detail: routePublicInfo_(routeCode, route, routeMode),
+        },
+      };
+    }
+  }
+
+  return {
+    ok: true,
+    spreadsheet: spreadsheet,
+    route_info: routePublicInfo_(routeCode, route, routeMode, spreadsheet),
+  };
+}
+
+function normalizeKecamatanCode_(value) {
+  const raw = text_(value).toUpperCase().replace(/\s+/g, '');
+  if (!raw) return '';
+  if (BACKFILL_WORKBOOK_ROUTES[raw]) return raw;
+
+  const knownCodes = Object.keys(BACKFILL_WORKBOOK_ROUTES);
+  for (let i = 0; i < knownCodes.length; i++) {
+    const code = knownCodes[i];
+    if (raw === code || raw.indexOf(code) === 0 || raw.indexOf('_' + code) >= 0 || raw.indexOf('-' + code) >= 0) {
+      return code;
+    }
+  }
+
+  return raw;
+}
+
+function validateRouteNameMismatch_(route, payload) {
+  const expectedName = text_(route.namaKecamatan).toUpperCase();
+  const receivedName = text_(payload.nama_kecamatan).toUpperCase();
+
+  if (!expectedName || !receivedName) return null;
+  if (expectedName === receivedName) return null;
+
+  return {
+    expected_nama_kecamatan: expectedName,
+    received_nama_kecamatan: receivedName,
+    spreadsheet_name: route.spreadsheetName,
+  };
+}
+
+function routePublicInfo_(routeCode, route, routeMode, spreadsheet) {
+  return {
+    route_code: routeCode,
+    spreadsheet_name: route.spreadsheetName,
+    nama_kecamatan: route.namaKecamatan,
+    is_active: route.isActive !== false,
+    spreadsheet_id_configured: Boolean(route.spreadsheetId),
+    route_mode: routeMode,
+    resolved_spreadsheet_id: spreadsheet ? spreadsheet.getId() : '',
+    resolved_spreadsheet_name: spreadsheet ? spreadsheet.getName() : '',
+  };
+}
+
+function routeErrorResponse_(routeResult, meta, action) {
+  return errorResponse_({
+    status: 'routing_error',
+    code: routeResult.error && routeResult.error.code ? routeResult.error.code : 'WORKBOOK_ROUTING_ERROR',
+    message: routeResult.error && routeResult.error.message ? routeResult.error.message : 'Router workbook gagal menentukan tujuan.',
+    detail: routeResult.error && routeResult.error.detail ? routeResult.error.detail : routeResult,
+    meta: buildMeta_(meta, action),
+  });
 }
 
 function parseRequest_(e) {
@@ -998,13 +1213,15 @@ function parseRequest_(e) {
   }
 }
 
-function buildMeta_(clientMeta, action) {
+function buildMeta_(clientMeta, action, routeInfo) {
   return {
     provider: 'GASProvider',
     app_mode: 'BACKFILL',
     action: action,
     backend_version: APP_BACKEND_VERSION,
     server_time: new Date().toISOString(),
+    router_mode: 'CENTRAL_ROUTER',
+    route: routeInfo || null,
     client_meta: clientMeta || {},
   };
 }

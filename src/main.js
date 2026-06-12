@@ -145,18 +145,48 @@ async function checkBackend() {
   });
 }
 
+function getCurrentRoutePayload() {
+  const context = getFormData("contextForm");
+
+  return {
+    requested_by: "frontend_paket_5_r1",
+    kode_kecamatan: context.kode_kecamatan || context.id_kecamatan,
+    id_kecamatan: context.id_kecamatan,
+    nama_kecamatan: context.nama_kecamatan,
+  };
+}
+
+async function checkWorkbookRoute() {
+  const routePayload = getCurrentRoutePayload();
+
+  renderJson("backendOutput", {
+    provider: backend.getProviderName(),
+    action: "getWorkbookRoute",
+    status: "checking",
+    payload: routePayload,
+  });
+
+  const result = await backend.getWorkbookRoute(routePayload);
+
+  renderJson("backendOutput", {
+    provider: backend.getProviderName(),
+    action: "getWorkbookRoute",
+    result,
+  });
+}
+
 async function setupStagingSheets() {
+  const routePayload = getCurrentRoutePayload();
+
   renderJson("backendOutput", {
     provider: backend.getProviderName(),
     action: "setupStagingSheets",
     status: "sending",
-    message: "Menyiapkan header sheet staging...",
+    message: "Menyiapkan header sheet staging berdasarkan route kecamatan...",
+    payload: routePayload,
   });
 
-  const result = await backend.setupStagingSheets({
-    requested_by: "frontend_paket_5",
-    expected_workbook: "BACKFILL_TPK_TJK",
-  });
+  const result = await backend.setupStagingSheets(routePayload);
 
   renderJson("backendOutput", {
     provider: backend.getProviderName(),
@@ -421,7 +451,7 @@ function fillSasaranSample() {
     nama_pasangan: "",
     no_hp: "",
     alamat_lengkap: "Alamat contoh backfill Tejakula",
-    catatan_backfill: "Contoh payload valid Paket 5",
+    catatan_backfill: "Contoh payload valid Paket 5-R1",
   });
   previewSasaran();
 }
@@ -438,7 +468,7 @@ function fillPendampinganSample() {
     status_pendampingan: "KUNJUNGAN_RUMAH",
     existing_count_for_kader_month: "0",
     hasil_pendampingan: "Pendampingan contoh berhasil dilakukan.",
-    catatan_pendampingan: "Contoh payload valid Paket 5",
+    catatan_pendampingan: "Contoh payload valid Paket 5-R1",
   });
   previewPendampingan();
 }
@@ -519,6 +549,7 @@ function deletePendampinganDraft() {
 
 function bindEvents() {
   $("checkBackendBtn")?.addEventListener("click", checkBackend);
+  $("checkRouteBtn")?.addEventListener("click", checkWorkbookRoute);
   $("setupSheetsBtn")?.addEventListener("click", setupStagingSheets);
   $("generateMutationBtn")?.addEventListener("click", generateMutationIds);
   $("checkContractBtn")?.addEventListener("click", checkContractLayer);

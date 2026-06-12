@@ -27,6 +27,7 @@ export function buildSharedContextPayload(formData = {}) {
     source_mode: APP_MODE,
     app_version: APP_META.version,
     id_kecamatan: toUpperValue(formData.id_kecamatan),
+    kode_kecamatan: toUpperValue(formData.kode_kecamatan || formData.id_kecamatan),
     nama_kecamatan: toUpperValue(formData.nama_kecamatan),
     id_tim: toUpperValue(formData.id_tim),
     id_kader: toUpperValue(formData.id_kader),

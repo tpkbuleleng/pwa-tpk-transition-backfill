@@ -33,6 +33,10 @@ export class BackendProvider {
     throw new Error("setupStagingSheets() belum diimplementasikan.");
   }
 
+  getWorkbookRoute(_payload) {
+    throw new Error("getWorkbookRoute() belum diimplementasikan.");
+  }
+
   submitRegistrasi(_payload) {
     throw new Error("submitRegistrasi() belum diimplementasikan.");
   }

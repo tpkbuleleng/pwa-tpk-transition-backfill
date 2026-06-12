@@ -16,7 +16,7 @@
         </div>
 
         <h1 class="app-title">PWA TPK Kabupaten Buleleng</h1>
-        <p class="app-subtitle">Paket 5 — Apps Script Provider & Sheet Staging</p>
+        <p class="app-subtitle">Paket 5-R1 — Central Apps Script Router & Workbook Routing Lock</p>
 
         <div class="info-grid">
           <div class="info-box">
@@ -37,11 +37,14 @@
       <section class="card">
         <h2>Status Backend</h2>
         <p class="section-description">
-          Tombol ini memastikan UI tetap memanggil backend melalui kontrak provider dan dapat menyiapkan Google Sheet staging Paket 5.
+          Tombol ini memastikan UI tetap memanggil backend melalui kontrak provider dan dapat menyiapkan Google Sheet staging melalui router workbook Paket 5-R1.
         </p>
 
         <div class="button-row">
           <button id="checkBackendBtn" type="button" class="primary-button">Cek Backend</button>
+          <button id="checkRouteBtn" type="button" class="primary-button">
+            Cek Workbook Route
+          </button>
           <button id="setupSheetsBtn" type="button" class="primary-button">
             Setup Sheet Staging
           </button>
@@ -62,13 +65,17 @@
       <section class="card">
         <h2>Data Konteks Kader / Tim</h2>
         <p class="section-description">
-          Untuk Paket 5, data konteks masih diisi manual agar submit ke Google Sheet staging bisa diuji tanpa login penuh.
+          Untuk Paket 5-R1, kode kecamatan dipakai router pusat untuk menentukan workbook tujuan. Data konteks masih diisi manual agar bisa diuji tanpa login penuh.
         </p>
 
         <form id="contextForm" class="form-grid" autocomplete="off">
           <label>
             <span>ID Kecamatan</span>
             <input name="id_kecamatan" value="TJK" />
+          </label>
+          <label>
+            <span>Kode Kecamatan Router</span>
+            <input name="kode_kecamatan" value="TJK" />
           </label>
           <label>
             <span>Nama Kecamatan</span>
@@ -244,9 +251,10 @@
       </section>
 
       <section class="note-card">
-        <h2>Catatan Paket 5</h2>
+        <h2>Catatan Paket 5-R1</h2>
         <ul>
-          <li>Form sudah dapat mengirim payload valid ke Apps Script Provider.</li>
+          <li>Form sudah dapat mengirim payload valid ke Apps Script Provider pusat.</li>
+          <li>Apps Script Router memilih workbook tujuan berdasarkan kode_kecamatan/id_kecamatan.</li>
           <li>Apps Script akan membuat header sheet staging dan append data ke sheet sesuai kontrak Paket 2.</li>
           <li>Draft lokal tetap tersedia sebagai pengaman sebelum submit.</li>
           <li>Service worker masih belum diaktifkan agar uji GitHub Pages tidak tertahan cache.</li>

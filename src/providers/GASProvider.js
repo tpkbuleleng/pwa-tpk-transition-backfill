@@ -81,6 +81,10 @@ export class GASProvider extends BackendProvider {
     return this.callAction("setupStagingSheets", payload);
   }
 
+  getWorkbookRoute(payload = {}) {
+    return this.callAction("getWorkbookRoute", payload);
+  }
+
   submitRegistrasi(payload) {
     return this.callAction("submitRegistrasi", payload);
   }
