@@ -16,7 +16,7 @@
         </div>
 
         <h1 class="app-title">PWA TPK Kabupaten Buleleng</h1>
-        <p class="app-subtitle">Paket 6 — Export CSV & Import Readiness</p>
+        <p class="app-subtitle">Paket 7-A — Supabase Staging Schema & Import Contract</p>
 
         <div class="info-grid">
           <div class="info-box">
@@ -34,10 +34,31 @@
         </div>
       </section>
 
+
+      <section class="card">
+        <div class="section-header-row">
+          <div>
+            <h2>Supabase Staging Schema & Import Contract</h2>
+            <p class="section-description">
+              Paket 7-A belum menghubungkan frontend ke Supabase. Modul ini hanya mengunci SQL schema, tabel staging, import_batch, import_error, dan rencana validasi sebelum promote ke production.
+            </p>
+          </div>
+          <span class="stage-badge">SQL STAGING</span>
+        </div>
+
+        <div class="button-row">
+          <button id="checkSupabaseStagingContractBtn" type="button" class="primary-button">
+            Cek Supabase Staging Contract
+          </button>
+        </div>
+
+        <pre id="supabaseStagingOutput" class="output-box compact-output">Belum ada hasil.</pre>
+      </section>
+
       <section class="card">
         <h2>Status Backend</h2>
         <p class="section-description">
-          Tombol ini memastikan UI tetap memanggil backend melalui kontrak provider dan dapat menyiapkan Google Sheet staging melalui router workbook dan export CSV Paket 6.
+          Tombol ini memastikan UI tetap memanggil backend melalui kontrak provider dan dapat menyiapkan Google Sheet staging melalui router workbook dan export CSV Paket 6, sambil menyiapkan kontrak Supabase staging Paket 7-A.
         </p>
 
         <div class="button-row">

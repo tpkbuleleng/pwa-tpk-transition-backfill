@@ -1,7 +1,5 @@
 PWA TPK Kabupaten Buleleng
-Paket 6 — Export CSV & Import Readiness
-Frontend version: tpk-transition-p6-20260612-r1
-Backend version: gas-backfill-router-p6-20260612-r1
-Status: siap uji
-Catatan: Service worker belum diaktifkan.
-
+Paket 7-A — Supabase Staging Schema & Import Contract
+Version: tpk-transition-p7a-20260612-r1
+Status: SQL staging contract package
+Previous baseline: Paket 6 PASS — Export CSV & Import Readiness

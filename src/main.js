@@ -22,6 +22,7 @@ import {
 } from "./forms/formOptions.js";
 import { buildPendampinganPayload, buildSasaranPayload } from "./payload/payloadBuilder.js";
 import { deleteDraft, DRAFT_KEYS, loadDraft, saveDraft } from "./storage/draftStorage.js";
+import { getSupabaseStagingContractSummary } from "./supabase/stagingContract.js";
 
 function $(id) {
   return document.getElementById(id);
@@ -639,6 +640,10 @@ async function exportCsv() {
   });
 }
 
+function checkSupabaseStagingContract() {
+  renderJson("supabaseStagingOutput", getSupabaseStagingContractSummary());
+}
+
 function bindEvents() {
   $("checkBackendBtn")?.addEventListener("click", checkBackend);
   $("checkRouteBtn")?.addEventListener("click", checkWorkbookRoute);
@@ -648,6 +653,7 @@ function bindEvents() {
   $("checkValidationBtn")?.addEventListener("click", checkValidationLayer);
   $("checkExportReadinessBtn")?.addEventListener("click", checkExportReadiness);
   $("exportCsvBtn")?.addEventListener("click", exportCsv);
+  $("checkSupabaseStagingContractBtn")?.addEventListener("click", checkSupabaseStagingContract);
 
   $("fillSasaranSampleBtn")?.addEventListener("click", fillSasaranSample);
   $("previewSasaranBtn")?.addEventListener("click", previewSasaran);
