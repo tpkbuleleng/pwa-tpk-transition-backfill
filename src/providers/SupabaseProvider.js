@@ -63,4 +63,12 @@ export class SupabaseProvider extends BackendProvider {
   getSubmitStatus(_payload) {
     return this.notReady("getSubmitStatus");
   }
+
+  getExportReadiness(_payload = {}) {
+    return this.notReady("getExportReadiness");
+  }
+
+  exportCsv(_payload = {}) {
+    return this.notReady("exportCsv");
+  }
 }

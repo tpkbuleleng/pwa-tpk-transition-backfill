@@ -16,7 +16,7 @@
         </div>
 
         <h1 class="app-title">PWA TPK Kabupaten Buleleng</h1>
-        <p class="app-subtitle">Paket 5-R1 — Central Apps Script Router & Workbook Routing Lock</p>
+        <p class="app-subtitle">Paket 6 — Export CSV & Import Readiness</p>
 
         <div class="info-grid">
           <div class="info-box">
@@ -37,7 +37,7 @@
       <section class="card">
         <h2>Status Backend</h2>
         <p class="section-description">
-          Tombol ini memastikan UI tetap memanggil backend melalui kontrak provider dan dapat menyiapkan Google Sheet staging melalui router workbook Paket 5-R1.
+          Tombol ini memastikan UI tetap memanggil backend melalui kontrak provider dan dapat menyiapkan Google Sheet staging melalui router workbook dan export CSV Paket 6.
         </p>
 
         <div class="button-row">
@@ -65,7 +65,7 @@
       <section class="card">
         <h2>Data Konteks Kader / Tim</h2>
         <p class="section-description">
-          Untuk Paket 5-R1, kode kecamatan dipakai router pusat untuk menentukan workbook tujuan. Data konteks masih diisi manual agar bisa diuji tanpa login penuh.
+          Untuk Paket 6, kode kecamatan tetap dipakai router pusat untuk menentukan workbook tujuan. Data konteks masih diisi manual agar export CSV bisa diuji tanpa login penuh.
         </p>
 
         <form id="contextForm" class="form-grid" autocomplete="off">
@@ -250,8 +250,55 @@
         <pre id="pendampinganOutput" class="output-box compact-output">Belum ada payload.</pre>
       </section>
 
+
+
+      <section class="card form-card">
+        <div class="section-header-row">
+          <div>
+            <h2>Export CSV & Import Readiness</h2>
+            <p class="section-description">
+              Modul ini mengekspor data staging ke CSV sesuai header Supabase staging, membuat export_log, dan menghasilkan import_batch_id untuk proses import berikutnya.
+            </p>
+          </div>
+          <span class="stage-badge">CSV EXPORT</span>
+        </div>
+
+        <form id="exportForm" class="form-grid" autocomplete="off">
+          <label>
+            <span>Record Type</span>
+            <select name="record_type">
+              <option value="sasaran">Sasaran</option>
+              <option value="pendampingan">Pendampingan</option>
+            </select>
+          </label>
+          <label>
+            <span>Periode Bulan</span>
+            <select name="periode_bulan" data-options="bulanBackfill"></select>
+          </label>
+          <label>
+            <span>Tahun Laporan</span>
+            <input name="tahun_laporan" value="2026" inputmode="numeric" />
+          </label>
+          <label>
+            <span>Buat File CSV di Google Drive</span>
+            <select name="create_drive_file">
+              <option value="TRUE">Ya</option>
+              <option value="FALSE">Tidak, hanya preview</option>
+            </select>
+          </label>
+        </form>
+
+        <div class="button-row">
+          <button id="checkExportReadinessBtn" type="button" class="primary-button">Cek Export Readiness</button>
+          <button id="exportCsvBtn" type="button" class="primary-button">Export CSV</button>
+        </div>
+
+        <div id="exportStatus" class="status-panel muted-panel">Belum ada export.</div>
+        <pre id="exportOutput" class="output-box compact-output">Belum ada hasil export.</pre>
+      </section>
+
       <section class="note-card">
-        <h2>Catatan Paket 5-R1</h2>
+        <h2>Catatan Paket 6</h2>
         <ul>
           <li>Form sudah dapat mengirim payload valid ke Apps Script Provider pusat.</li>
           <li>Apps Script Router memilih workbook tujuan berdasarkan kode_kecamatan/id_kecamatan.</li>

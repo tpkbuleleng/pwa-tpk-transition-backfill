@@ -52,4 +52,12 @@ export class BackendProvider {
   getSubmitStatus(_payload) {
     throw new Error("getSubmitStatus() belum diimplementasikan.");
   }
+
+  getExportReadiness(_payload) {
+    throw new Error("getExportReadiness() belum diimplementasikan.");
+  }
+
+  exportCsv(_payload) {
+    throw new Error("exportCsv() belum diimplementasikan.");
+  }
 }

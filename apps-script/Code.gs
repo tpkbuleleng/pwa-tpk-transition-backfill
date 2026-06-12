@@ -1,6 +1,6 @@
 /**
  * PWA TPK Kabupaten Buleleng
- * Paket 5-R1 — Central Apps Script Router & Workbook Routing Lock
+ * Paket 6 — Export CSV & Import Readiness
  *
  * Fungsi utama:
  * - healthCheck
@@ -23,7 +23,7 @@
  * - Fallback active spreadsheet hanya untuk uji, bukan pola final 9 kecamatan.
  */
 
-const APP_BACKEND_VERSION = 'gas-backfill-router-p5-r1-20260612-r1';
+const APP_BACKEND_VERSION = 'gas-backfill-router-p6-20260612-r1';
 
 /**
  * Paket 5-R1 menggunakan 1 Apps Script pusat sebagai ROUTER.
@@ -230,7 +230,7 @@ function setupStagingSheetsMenu() {
 
 function doGet(e) {
   return jsonResponse_(successResponse_({
-    message: 'Apps Script BACKFILL Paket 5 endpoint aktif. Gunakan POST untuk action backend.',
+    message: 'Apps Script BACKFILL Paket 6 endpoint aktif. Gunakan POST untuk action backend.',
     data: {
       method: 'GET',
       query: e && e.parameter ? e.parameter : {},
@@ -265,14 +265,20 @@ function doPost(e) {
       case 'getSubmitStatus':
         return jsonResponse_(handleGetSubmitStatus_(payload, meta));
 
+      case 'getExportReadiness':
+        return jsonResponse_(handleGetExportReadiness_(payload, meta));
+
+      case 'exportCsv':
+        return jsonResponse_(handleExportCsv_(payload, meta));
+
       case 'login':
       case 'getMyProfileLite':
       case 'getMasterRefs':
       case 'submitBatch':
         return jsonResponse_(errorResponse_({
           status: 'not_implemented',
-          code: 'ACTION_NOT_IMPLEMENTED_IN_PACKAGE_5_R1',
-          message: 'Action ' + action + ' belum diimplementasikan pada Paket 5-R1.',
+          code: 'ACTION_NOT_IMPLEMENTED_IN_PACKAGE_6',
+          message: 'Action ' + action + ' belum diimplementasikan pada Paket 6.',
           detail: { action: action },
           meta: buildMeta_(meta, action),
         }));
@@ -310,7 +316,7 @@ function handleHealthCheck_(payload, meta) {
   }
 
   return successResponse_({
-    message: 'Apps Script BACKFILL Router Paket 5-R1 endpoint sehat.',
+    message: 'Apps Script BACKFILL Router Paket 6 endpoint sehat.',
     data: {
       received_payload: payload || {},
       server_time: new Date().toISOString(),
@@ -636,6 +642,405 @@ function handleGetSubmitStatus_(payload, meta) {
     },
     meta: buildMeta_(meta, 'getSubmitStatus'),
   });
+}
+
+
+function handleGetExportReadiness_(payload, meta) {
+  const routeResult = resolveWorkbookRoute_(payload || {}, { allowSpreadsheetOpen: true });
+  if (!routeResult.ok) {
+    return routeErrorResponse_(routeResult, meta, 'getExportReadiness');
+  }
+
+  const ss = routeResult.spreadsheet;
+  setupStagingSheets_(ss);
+
+  const target = resolveExportTarget_(payload || {});
+  if (!target.ok) {
+    return errorResponse_({
+      status: 'bad_request',
+      code: target.code,
+      message: target.message,
+      detail: target.detail,
+      meta: buildMeta_(meta, 'getExportReadiness', routeResult.route_info),
+    });
+  }
+
+  const readiness = buildExportReadiness_(ss, target);
+
+  return successResponse_({
+    message: 'Export readiness berhasil diperiksa.',
+    data: {
+      router_mode: 'CENTRAL_ROUTER',
+      route: routeResult.route_info,
+      target: readiness,
+      csv_header_version: 'csv-contract-p2-20260612-r1',
+      import_readiness: buildImportReadiness_(target, readiness),
+    },
+    meta: buildMeta_(meta, 'getExportReadiness', routeResult.route_info),
+  });
+}
+
+function handleExportCsv_(payload, meta) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+
+  try {
+    const routeResult = resolveWorkbookRoute_(payload || {}, { allowSpreadsheetOpen: true });
+    if (!routeResult.ok) {
+      return routeErrorResponse_(routeResult, meta, 'exportCsv');
+    }
+
+    const ss = routeResult.spreadsheet;
+    setupStagingSheets_(ss);
+
+    const target = resolveExportTarget_(payload || {});
+    if (!target.ok) {
+      return errorResponse_({
+        status: 'bad_request',
+        code: target.code,
+        message: target.message,
+        detail: target.detail,
+        meta: buildMeta_(meta, 'exportCsv', routeResult.route_info),
+      });
+    }
+
+    const readiness = buildExportReadiness_(ss, target);
+    const exportBatchId = makeRecordId_('EXPB');
+    const importBatchId = makeRecordId_('IMPB');
+
+    if (!readiness.header_ok) {
+      const failedLog = appendExportLog_(ss, {
+        export_batch_id: exportBatchId,
+        source_workbook: ss.getName(),
+        source_sheet: target.sheet_name,
+        record_type: target.record_type,
+        periode_bulan: target.periode_bulan || '',
+        tahun_laporan: target.tahun_laporan || BACKFILL_YEAR,
+        total_rows: readiness.total_rows,
+        exported_by: meta && meta.app_name ? meta.app_name : 'PWA TPK',
+        file_name: '',
+        checksum_sha256: '',
+        status: 'FAILED_HEADER_MISMATCH',
+        notes: 'Header sheet tidak sesuai kontrak CSV.'
+      });
+
+      return errorResponse_({
+        status: 'header_mismatch',
+        code: 'CSV_HEADER_MISMATCH',
+        message: 'Header sheet tidak sesuai kontrak CSV. Export dibatalkan.',
+        detail: {
+          target: readiness,
+          export_log_row_number: failedLog.row_number,
+        },
+        meta: buildMeta_(meta, 'exportCsv', routeResult.route_info),
+      });
+    }
+
+    const csvBuild = buildCsvFromSheet_(ss.getSheetByName(target.sheet_name), target.headers, {
+      import_batch_id: importBatchId,
+    });
+
+    const fileName = buildExportFileName_(routeResult.route_info.route_code, target, exportBatchId);
+    const checksum = sha256Hex_(csvBuild.csv_content);
+    let fileUrl = '';
+    let fileId = '';
+
+    const createDriveFile = payload && (payload.create_drive_file === true || text_(payload.create_drive_file).toUpperCase() === 'TRUE');
+    if (createDriveFile) {
+      const blob = Utilities.newBlob(csvBuild.csv_content, 'text/csv', fileName);
+      const file = DriveApp.createFile(blob);
+      fileUrl = file.getUrl();
+      fileId = file.getId();
+    }
+
+    const logResult = appendExportLog_(ss, {
+      export_batch_id: exportBatchId,
+      source_workbook: ss.getName(),
+      source_sheet: target.sheet_name,
+      record_type: target.record_type,
+      periode_bulan: target.periode_bulan || '',
+      tahun_laporan: target.tahun_laporan || BACKFILL_YEAR,
+      total_rows: csvBuild.data_row_count,
+      exported_by: meta && meta.app_name ? meta.app_name : 'PWA TPK',
+      file_name: fileName,
+      checksum_sha256: checksum,
+      status: createDriveFile ? 'EXPORTED_TO_DRIVE' : 'PREVIEW_ONLY',
+      notes: createDriveFile ? 'CSV dibuat di Google Drive.' : 'CSV tidak dibuat di Drive; preview saja.'
+    });
+
+    return successResponse_({
+      message: createDriveFile ? 'CSV berhasil dibuat di Google Drive dan export_log tercatat.' : 'CSV berhasil dibuat sebagai preview dan export_log tercatat.',
+      data: {
+        router_mode: 'CENTRAL_ROUTER',
+        route: routeResult.route_info,
+        record_type: target.record_type,
+        sheet_name: target.sheet_name,
+        periode_bulan: target.periode_bulan || '',
+        tahun_laporan: target.tahun_laporan || BACKFILL_YEAR,
+        total_rows: csvBuild.data_row_count,
+        exported_columns: target.headers.length,
+        export_batch_id: exportBatchId,
+        import_batch_id: importBatchId,
+        csv_header_version: 'csv-contract-p2-20260612-r1',
+        file_name: fileName,
+        file_id: fileId,
+        file_url: fileUrl,
+        checksum_sha256: checksum,
+        export_log_row_number: logResult.row_number,
+        import_batch_preview: buildImportBatchPreview_(routeResult.route_info, target, importBatchId, fileName, csvBuild.data_row_count),
+        csv_preview: csvBuild.csv_preview,
+      },
+      meta: buildMeta_(meta, 'exportCsv', routeResult.route_info),
+    });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function resolveExportTarget_(payload) {
+  const recordType = text_(payload.record_type || payload.type || 'sasaran').toLowerCase();
+  const year = Number(payload.tahun_laporan || BACKFILL_YEAR);
+
+  if (recordType === 'sasaran') {
+    return {
+      ok: true,
+      record_type: 'sasaran',
+      sheet_name: STAGING_SHEET_NAMES.SASARAN,
+      headers: SASARAN_HEADERS,
+      periode_bulan: '',
+      tahun_laporan: '',
+    };
+  }
+
+  if (recordType === 'pendampingan') {
+    const month = Number(payload.periode_bulan);
+    const sheetName = getPendampinganSheetName_(month);
+
+    if (!sheetName) {
+      return {
+        ok: false,
+        code: 'INVALID_EXPORT_MONTH',
+        message: 'Export pendampingan wajib memilih bulan Januari sampai Juni.',
+        detail: { periode_bulan: payload.periode_bulan },
+      };
+    }
+
+    if (year !== BACKFILL_YEAR) {
+      return {
+        ok: false,
+        code: 'INVALID_EXPORT_YEAR',
+        message: 'Export backfill hanya untuk tahun 2026.',
+        detail: { tahun_laporan: payload.tahun_laporan },
+      };
+    }
+
+    return {
+      ok: true,
+      record_type: 'pendampingan',
+      sheet_name: sheetName,
+      headers: PENDAMPINGAN_HEADERS,
+      periode_bulan: month,
+      tahun_laporan: year,
+    };
+  }
+
+  return {
+    ok: false,
+    code: 'INVALID_RECORD_TYPE',
+    message: 'record_type export harus sasaran atau pendampingan.',
+    detail: { record_type: payload.record_type },
+  };
+}
+
+function buildExportReadiness_(ss, target) {
+  const sheet = ss.getSheetByName(target.sheet_name);
+
+  if (!sheet) {
+    return {
+      ok: false,
+      sheet_exists: false,
+      header_ok: false,
+      exportable: false,
+      record_type: target.record_type,
+      sheet_name: target.sheet_name,
+      total_rows: 0,
+      data_rows: 0,
+      empty_rows_ignored: 0,
+      column_count: target.headers.length,
+      issues: [{ code: 'SHEET_NOT_FOUND', message: 'Sheet target tidak ditemukan.' }],
+    };
+  }
+
+  const headerCheck = checkHeaderContract_(sheet, target.headers);
+  const stats = countDataRows_(sheet, target.headers.length);
+
+  return {
+    ok: headerCheck.ok,
+    sheet_exists: true,
+    header_ok: headerCheck.ok,
+    exportable: headerCheck.ok,
+    record_type: target.record_type,
+    sheet_name: target.sheet_name,
+    periode_bulan: target.periode_bulan || '',
+    tahun_laporan: target.tahun_laporan || '',
+    total_rows: stats.data_rows,
+    data_rows: stats.data_rows,
+    empty_rows_ignored: stats.empty_rows,
+    column_count: target.headers.length,
+    header_version: 'csv-contract-p2-20260612-r1',
+    issues: headerCheck.issues,
+  };
+}
+
+function checkHeaderContract_(sheet, expectedHeaders) {
+  const actual = sheet.getRange(1, 1, 1, expectedHeaders.length).getDisplayValues()[0].map(text_);
+  const issues = [];
+
+  for (let i = 0; i < expectedHeaders.length; i++) {
+    if (actual[i] !== expectedHeaders[i]) {
+      issues.push({
+        code: 'HEADER_MISMATCH',
+        column: i + 1,
+        expected: expectedHeaders[i],
+        actual: actual[i],
+      });
+    }
+  }
+
+  return { ok: issues.length === 0, issues: issues };
+}
+
+function countDataRows_(sheet, columnCount) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { data_rows: 0, empty_rows: 0 };
+
+  const values = sheet.getRange(2, 1, lastRow - 1, columnCount).getDisplayValues();
+  let dataRows = 0;
+  let emptyRows = 0;
+
+  values.forEach(function (row) {
+    const empty = row.every(function (cell) { return text_(cell) === ''; });
+    if (empty) emptyRows++;
+    else dataRows++;
+  });
+
+  return { data_rows: dataRows, empty_rows: emptyRows };
+}
+
+function buildCsvFromSheet_(sheet, headers, overrides) {
+  overrides = overrides || {};
+
+  const lastRow = sheet.getLastRow();
+  const rows = [headers];
+
+  if (lastRow >= 2) {
+    const values = sheet.getRange(2, 1, lastRow - 1, headers.length).getDisplayValues();
+    values.forEach(function (row) {
+      const empty = row.every(function (cell) { return text_(cell) === ''; });
+      if (empty) return;
+
+      const outputRow = row.slice();
+      Object.keys(overrides).forEach(function (field) {
+        const index = headers.indexOf(field);
+        if (index >= 0) outputRow[index] = overrides[field];
+      });
+
+      rows.push(outputRow);
+    });
+  }
+
+  const csvContent = rows.map(function (row) {
+    return row.map(csvEscape_).join(',');
+  }).join('\r\n');
+
+  return {
+    csv_content: csvContent,
+    data_row_count: rows.length - 1,
+    csv_preview: rows.slice(0, Math.min(rows.length, 6)).map(function (row) {
+      return row.map(csvEscape_).join(',');
+    }).join('\n'),
+  };
+}
+
+function csvEscape_(value) {
+  const raw = text_(value);
+  if (/[",\r\n]/.test(raw)) {
+    return '"' + raw.replace(/"/g, '""') + '"';
+  }
+  return raw;
+}
+
+function buildExportFileName_(routeCode, target, exportBatchId) {
+  const record = target.record_type;
+  const period = record === 'pendampingan'
+    ? String(target.tahun_laporan || BACKFILL_YEAR) + String(target.periode_bulan).padStart(2, '0')
+    : 'sasaran';
+  return [routeCode, record, period, exportBatchId].join('_') + '.csv';
+}
+
+function sha256Hex_(textValue) {
+  const digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, textValue, Utilities.Charset.UTF_8);
+  return digest.map(function (byte) {
+    const value = byte < 0 ? byte + 256 : byte;
+    return ('0' + value.toString(16)).slice(-2);
+  }).join('');
+}
+
+function appendExportLog_(ss, options) {
+  const sheet = ss.getSheetByName(STAGING_SHEET_NAMES.EXPORT_LOG);
+  if (!sheet) return { row_number: '' };
+
+  const rowObject = {
+    export_id: makeRecordId_('EXP'),
+    export_batch_id: text_(options.export_batch_id),
+    source_workbook: text_(options.source_workbook),
+    source_sheet: text_(options.source_sheet),
+    record_type: text_(options.record_type),
+    periode_bulan: text_(options.periode_bulan),
+    tahun_laporan: text_(options.tahun_laporan),
+    total_rows: text_(options.total_rows),
+    exported_by: text_(options.exported_by),
+    exported_at: new Date().toISOString(),
+    file_name: text_(options.file_name),
+    checksum_sha256: text_(options.checksum_sha256),
+    status: text_(options.status),
+    notes: text_(options.notes),
+  };
+
+  return appendObjectRow_(sheet, EXPORT_LOG_HEADERS, rowObject);
+}
+
+function buildImportReadiness_(target, readiness) {
+  return {
+    target_supabase_table: target.record_type === 'sasaran' ? 'staging_sasaran_import' : 'staging_pendampingan_import',
+    csv_header_version: 'csv-contract-p2-20260612-r1',
+    import_batch_required: true,
+    import_batch_id_will_be_generated_on_export: true,
+    header_ok: readiness.header_ok,
+    rows_ready: readiness.data_rows,
+    next_step: 'Upload CSV ke Supabase staging table, lalu jalankan validasi SQL/RPC sebelum promote ke production.',
+  };
+}
+
+function buildImportBatchPreview_(routeInfo, target, importBatchId, fileName, totalRows) {
+  return {
+    import_batch_id: importBatchId,
+    source_mode: 'BACKFILL',
+    kode_kecamatan: routeInfo.route_code,
+    nama_kecamatan: routeInfo.nama_kecamatan,
+    record_type: target.record_type,
+    periode_bulan: target.periode_bulan || '',
+    tahun_laporan: target.tahun_laporan || BACKFILL_YEAR,
+    file_name: fileName,
+    csv_header_version: 'csv-contract-p2-20260612-r1',
+    total_rows: totalRows,
+    valid_rows: '',
+    error_rows: '',
+    imported_by: '',
+    imported_at: '',
+    status: 'READY_FOR_IMPORT',
+    notes: 'Dihasilkan dari Google Sheet staging BACKFILL melalui Paket 6.',
+  };
 }
 
 function setupStagingSheets_(ss) {

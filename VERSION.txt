@@ -1,5 +1,6 @@
-Paket: 5-R1 — Central Apps Script Router & Workbook Routing Lock
-Frontend Version: tpk-transition-p5-r1-20260612-r1
-Backend Version: gas-backfill-router-p5-r1-20260612-r1
-Status: update files only; backendConfig.js intentionally excluded.
-
+PWA TPK Kabupaten Buleleng
+Paket 6 — Export CSV & Import Readiness
+Frontend version: tpk-transition-p6-20260612-r1
+Backend version: gas-backfill-router-p6-20260612-r1
+Status: siap uji
+Catatan: Service worker belum diaktifkan.

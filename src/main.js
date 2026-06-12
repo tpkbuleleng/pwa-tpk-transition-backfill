@@ -451,7 +451,7 @@ function fillSasaranSample() {
     nama_pasangan: "",
     no_hp: "",
     alamat_lengkap: "Alamat contoh backfill Tejakula",
-    catatan_backfill: "Contoh payload valid Paket 5-R1",
+    catatan_backfill: "Contoh payload valid Paket 6",
   });
   previewSasaran();
 }
@@ -468,7 +468,7 @@ function fillPendampinganSample() {
     status_pendampingan: "KUNJUNGAN_RUMAH",
     existing_count_for_kader_month: "0",
     hasil_pendampingan: "Pendampingan contoh berhasil dilakukan.",
-    catatan_pendampingan: "Contoh payload valid Paket 5-R1",
+    catatan_pendampingan: "Contoh payload valid Paket 6",
   });
   previewPendampingan();
 }
@@ -547,6 +547,98 @@ function deletePendampinganDraft() {
   });
 }
 
+
+function getExportPayload() {
+  const context = getFormData("contextForm");
+  const exportData = getFormData("exportForm");
+
+  return {
+    requested_by: "frontend_paket_6",
+    kode_kecamatan: context.kode_kecamatan || context.id_kecamatan,
+    id_kecamatan: context.id_kecamatan,
+    nama_kecamatan: context.nama_kecamatan,
+    record_type: exportData.record_type || "sasaran",
+    periode_bulan: exportData.periode_bulan || "1",
+    tahun_laporan: exportData.tahun_laporan || "2026",
+    create_drive_file: exportData.create_drive_file !== "FALSE",
+  };
+}
+
+function renderExportStatus(result, actionLabel) {
+  const target = $("exportStatus");
+  if (!target) return;
+
+  target.classList.remove("muted-panel", "success-panel", "error-panel");
+  target.classList.add(result.ok ? "success-panel" : "error-panel");
+
+  if (result.ok) {
+    const data = result.data || {};
+    const fileLink = data.file_url
+      ? `<br />File CSV: <a href="${data.file_url}" target="_blank" rel="noopener">Buka file di Google Drive</a>`
+      : "";
+
+    target.innerHTML = `
+      <strong>${actionLabel} berhasil.</strong><br />
+      Status: <code>${result.status}</code><br />
+      Route: <code>${data.route?.route_code || data.route_code || "-"}</code><br />
+      Sheet: <code>${data.sheet_name || data.target?.sheet_name || "-"}</code><br />
+      Total rows: <code>${data.total_rows ?? data.target?.total_rows ?? "-"}</code><br />
+      Export batch: <code>${data.export_batch_id || "-"}</code><br />
+      Import batch: <code>${data.import_batch_id || "-"}</code>
+      ${fileLink}
+    `;
+    return;
+  }
+
+  target.innerHTML = `
+    <strong>${actionLabel} gagal.</strong><br />
+    Status: <code>${result.status || "error"}</code><br />
+    Error: <code>${result.error?.code || "UNKNOWN_ERROR"}</code><br />
+    ${result.message || result.error?.message || "Terjadi kesalahan."}
+  `;
+}
+
+async function checkExportReadiness() {
+  const payload = getExportPayload();
+
+  renderJson("exportOutput", {
+    action: "getExportReadiness",
+    status: "checking",
+    payload,
+  });
+
+  const result = await backend.getExportReadiness(payload);
+  renderExportStatus(result, "Cek export readiness");
+
+  renderJson("exportOutput", {
+    provider: backend.getProviderName(),
+    action: "getExportReadiness",
+    result,
+    payload,
+  });
+}
+
+async function exportCsv() {
+  const payload = getExportPayload();
+
+  renderJson("exportOutput", {
+    action: "exportCsv",
+    status: "exporting",
+    message: "Mengekspor CSV dari Google Sheet staging...",
+    payload,
+  });
+
+  const result = await backend.exportCsv(payload);
+  renderExportStatus(result, "Export CSV");
+
+  renderJson("exportOutput", {
+    provider: backend.getProviderName(),
+    action: "exportCsv",
+    result,
+    payload,
+  });
+}
+
 function bindEvents() {
   $("checkBackendBtn")?.addEventListener("click", checkBackend);
   $("checkRouteBtn")?.addEventListener("click", checkWorkbookRoute);
@@ -554,6 +646,8 @@ function bindEvents() {
   $("generateMutationBtn")?.addEventListener("click", generateMutationIds);
   $("checkContractBtn")?.addEventListener("click", checkContractLayer);
   $("checkValidationBtn")?.addEventListener("click", checkValidationLayer);
+  $("checkExportReadinessBtn")?.addEventListener("click", checkExportReadiness);
+  $("exportCsvBtn")?.addEventListener("click", exportCsv);
 
   $("fillSasaranSampleBtn")?.addEventListener("click", fillSasaranSample);
   $("previewSasaranBtn")?.addEventListener("click", previewSasaran);

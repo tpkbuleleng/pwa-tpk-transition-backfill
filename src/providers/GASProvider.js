@@ -100,4 +100,12 @@ export class GASProvider extends BackendProvider {
   getSubmitStatus(payload) {
     return this.callAction("getSubmitStatus", payload);
   }
+
+  getExportReadiness(payload = {}) {
+    return this.callAction("getExportReadiness", payload);
+  }
+
+  exportCsv(payload = {}) {
+    return this.callAction("exportCsv", payload);
+  }
 }
