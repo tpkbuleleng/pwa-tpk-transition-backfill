@@ -16,7 +16,7 @@
         </div>
 
         <h1 class="app-title">PWA TPK Kabupaten Buleleng</h1>
-        <p class="app-subtitle">Paket 7-A-R1 — Pendampingan Identity Binding & Import Repair</p>
+        <p class="app-subtitle">Paket 7-B — Supabase Import Validation & Promote Dry Run</p>
 
         <div class="info-grid">
           <div class="info-box">
@@ -40,7 +40,7 @@
           <div>
             <h2>Supabase Staging Schema & Import Contract</h2>
             <p class="section-description">
-              Paket 7-A-R1 belum menghubungkan frontend ke Supabase. Modul ini hanya mengunci SQL schema, tabel staging, import_batch, import_error, serta penguncian identitas sasaran pada pendampingan sebelum promote ke production.
+              Paket 7-B belum menghubungkan frontend ke Supabase. Modul ini menambahkan kontrak dry-run promote agar data valid dari staging bisa diuji masuk ke tabel production-like sementara tanpa menyentuh production final.
             </p>
           </div>
           <span class="stage-badge">SQL STAGING</span>
@@ -53,6 +53,28 @@
         </div>
 
         <pre id="supabaseStagingOutput" class="output-box compact-output">Belum ada hasil.</pre>
+      </section>
+
+
+
+      <section class="card">
+        <div class="section-header-row">
+          <div>
+            <h2>Supabase Promote Dry Run Contract</h2>
+            <p class="section-description">
+              Modul ini menjelaskan tabel dry-run, fungsi promote_backfill_batch_dry_run(), purge dry-run, serta aturan relasi sasaran-pendampingan sebelum production final.
+            </p>
+          </div>
+          <span class="stage-badge">DRY RUN</span>
+        </div>
+
+        <div class="button-row">
+          <button id="checkSupabasePromoteDryRunContractBtn" type="button" class="primary-button">
+            Cek Supabase Promote Dry Run Contract
+          </button>
+        </div>
+
+        <pre id="supabasePromoteDryRunOutput" class="output-box compact-output">Belum ada hasil.</pre>
       </section>
 
       <section class="card">
@@ -331,12 +353,12 @@
       </section>
 
       <section class="note-card">
-        <h2>Catatan Paket 6</h2>
+        <h2>Catatan Paket 7-B</h2>
         <ul>
-          <li>Form sudah dapat mengirim payload valid ke Apps Script Provider pusat.</li>
-          <li>Apps Script Router memilih workbook tujuan berdasarkan kode_kecamatan/id_kecamatan.</li>
-          <li>Apps Script akan membuat header sheet staging dan append data ke sheet sesuai kontrak Paket 2.</li>
-          <li>Draft lokal tetap tersedia sebagai pengaman sebelum submit.</li>
+          <li>Paket 7-B hanya menambahkan kontrak SQL dry-run; production final belum disentuh.</li>
+          <li>Data valid dari staging dipromosikan ke dryrun_sasaran dan dryrun_pendampingan.</li>
+          <li>Relasi pendampingan ke sasaran dicek memakai sasaran_unique_key.</li>
+          <li>Fungsi dry-run hanya untuk SQL Editor/admin, bukan frontend publik.</li>
           <li>Service worker masih belum diaktifkan agar uji GitHub Pages tidak tertahan cache.</li>
         </ul>
       </section>

@@ -13,7 +13,7 @@ export const APP_MODES = Object.freeze({
  */
 export const APP_MODE = APP_MODES.BACKFILL;
 
-export const APP_VERSION = "tpk-transition-p7a-r1-20260612-r1";
+export const APP_VERSION = "tpk-transition-p7b-20260612-r1";
 
 export const APP_META = Object.freeze({
   appName: "PWA TPK Kabupaten Buleleng",

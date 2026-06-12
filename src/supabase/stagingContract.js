@@ -1,6 +1,6 @@
 // src/supabase/stagingContract.js
 
-export const SUPABASE_STAGING_CONTRACT_VERSION = "supabase-staging-p7a-20260612-r1";
+export const SUPABASE_STAGING_CONTRACT_VERSION = "supabase-staging-p7a-r1-20260612-r1";
 
 export const SUPABASE_STAGING_TABLES = Object.freeze({
   staging_sasaran_import: {
@@ -50,6 +50,6 @@ export function getSupabaseStagingContractSummary() {
       "Validasi dilakukan setelah import melalui SQL function validate_backfill_import_batch(import_batch_id).",
       "RLS diaktifkan tanpa policy publik agar staging tidak terbuka ke frontend.",
     ],
-    next_package: "Paket 7-B — Supabase Import Validation & Promote Dry Run",
+    next_package: "Paket 7-B — Supabase Import Validation & Promote Dry Run (aktif pada package ini)",
   };
 }

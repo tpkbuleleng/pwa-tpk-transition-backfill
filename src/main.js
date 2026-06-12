@@ -23,6 +23,7 @@ import {
 import { buildPendampinganPayload, buildSasaranPayload } from "./payload/payloadBuilder.js";
 import { deleteDraft, DRAFT_KEYS, loadDraft, saveDraft } from "./storage/draftStorage.js";
 import { getSupabaseStagingContractSummary } from "./supabase/stagingContract.js";
+import { getSupabasePromoteDryRunContractSummary } from "./supabase/promoteDryRunContract.js";
 
 function $(id) {
   return document.getElementById(id);
@@ -150,7 +151,7 @@ function getCurrentRoutePayload() {
   const context = getFormData("contextForm");
 
   return {
-    requested_by: "frontend_paket_7a_r1",
+    requested_by: "frontend_paket_7b",
     kode_kecamatan: context.kode_kecamatan || context.id_kecamatan,
     id_kecamatan: context.id_kecamatan,
     nama_kecamatan: context.nama_kecamatan,
@@ -452,7 +453,7 @@ function fillSasaranSample() {
     nama_pasangan: "",
     no_hp: "",
     alamat_lengkap: "Alamat contoh backfill Tejakula",
-    catatan_backfill: "Contoh payload valid Paket 7-A-R1",
+    catatan_backfill: "Contoh payload valid Paket 7-B",
   });
   previewSasaran();
 }
@@ -472,7 +473,7 @@ function fillPendampinganSample() {
     status_pendampingan: "KUNJUNGAN_RUMAH",
     existing_count_for_kader_month: "0",
     hasil_pendampingan: "Pendampingan contoh berhasil dilakukan.",
-    catatan_pendampingan: "Contoh payload valid Paket 7-A-R1",
+    catatan_pendampingan: "Contoh payload valid Paket 7-B",
   });
   previewPendampingan();
 }
@@ -557,7 +558,7 @@ function getExportPayload() {
   const exportData = getFormData("exportForm");
 
   return {
-    requested_by: "frontend_paket_7a_r1",
+    requested_by: "frontend_paket_7b",
     kode_kecamatan: context.kode_kecamatan || context.id_kecamatan,
     id_kecamatan: context.id_kecamatan,
     nama_kecamatan: context.nama_kecamatan,
@@ -647,6 +648,10 @@ function checkSupabaseStagingContract() {
   renderJson("supabaseStagingOutput", getSupabaseStagingContractSummary());
 }
 
+function checkSupabasePromoteDryRunContract() {
+  renderJson("supabasePromoteDryRunOutput", getSupabasePromoteDryRunContractSummary());
+}
+
 function bindEvents() {
   $("checkBackendBtn")?.addEventListener("click", checkBackend);
   $("checkRouteBtn")?.addEventListener("click", checkWorkbookRoute);
@@ -657,6 +662,7 @@ function bindEvents() {
   $("checkExportReadinessBtn")?.addEventListener("click", checkExportReadiness);
   $("exportCsvBtn")?.addEventListener("click", exportCsv);
   $("checkSupabaseStagingContractBtn")?.addEventListener("click", checkSupabaseStagingContract);
+  $("checkSupabasePromoteDryRunContractBtn")?.addEventListener("click", checkSupabasePromoteDryRunContract);
 
   $("fillSasaranSampleBtn")?.addEventListener("click", fillSasaranSample);
   $("previewSasaranBtn")?.addEventListener("click", previewSasaran);
