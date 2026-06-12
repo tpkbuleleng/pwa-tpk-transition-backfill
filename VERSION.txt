@@ -1,7 +1,6 @@
 PWA TPK Kabupaten Buleleng
-Paket 4 — Shared UI Form
-Version: tpk-transition-p4-20260612-r1
-Mode: BACKFILL
-Provider: GASProvider
-Service Worker: disabled intentionally
-
+Paket 5 — Apps Script Provider & Sheet Staging
+Version: tpk-transition-p5-20260612-r1
+Status: update files only
+Service worker: disabled intentionally
+Backend target: Apps Script + Google Sheet staging

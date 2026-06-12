@@ -40,6 +40,10 @@ export class SupabaseProvider extends BackendProvider {
     return this.notReady("getMasterRefs");
   }
 
+  setupStagingSheets(_payload = {}) {
+    return this.notReady("setupStagingSheets");
+  }
+
   submitRegistrasi(_payload) {
     return this.notReady("submitRegistrasi");
   }

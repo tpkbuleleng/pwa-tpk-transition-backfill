@@ -29,6 +29,10 @@ export class BackendProvider {
     throw new Error("getMasterRefs() belum diimplementasikan.");
   }
 
+  setupStagingSheets(_payload) {
+    throw new Error("setupStagingSheets() belum diimplementasikan.");
+  }
+
   submitRegistrasi(_payload) {
     throw new Error("submitRegistrasi() belum diimplementasikan.");
   }

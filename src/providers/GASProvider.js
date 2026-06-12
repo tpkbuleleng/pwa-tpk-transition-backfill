@@ -32,17 +32,10 @@ export class GASProvider extends BackendProvider {
         timeoutMs: this.config.timeoutMs,
       });
 
-      /**
-       * Jika Apps Script sudah mengembalikan envelope standar,
-       * langsung teruskan.
-       */
       if (typeof raw?.ok === "boolean" && raw.status) {
         return raw;
       }
 
-      /**
-       * Fallback sementara untuk response sederhana dari Apps Script.
-       */
       return successResponse({
         data: raw,
         message: "Response Apps Script diterima.",
@@ -82,6 +75,10 @@ export class GASProvider extends BackendProvider {
 
   getMasterRefs(payload = {}) {
     return this.callAction("getMasterRefs", payload);
+  }
+
+  setupStagingSheets(payload = {}) {
+    return this.callAction("setupStagingSheets", payload);
   }
 
   submitRegistrasi(payload) {

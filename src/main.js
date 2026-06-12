@@ -145,6 +145,26 @@ async function checkBackend() {
   });
 }
 
+async function setupStagingSheets() {
+  renderJson("backendOutput", {
+    provider: backend.getProviderName(),
+    action: "setupStagingSheets",
+    status: "sending",
+    message: "Menyiapkan header sheet staging...",
+  });
+
+  const result = await backend.setupStagingSheets({
+    requested_by: "frontend_paket_5",
+    expected_workbook: "BACKFILL_TPK_TJK",
+  });
+
+  renderJson("backendOutput", {
+    provider: backend.getProviderName(),
+    action: "setupStagingSheets",
+    result,
+  });
+}
+
 function generateMutationIds() {
   renderJson("backendOutput", {
     registrasi: createClientMutationId("reg"),
@@ -228,7 +248,42 @@ function renderValidationStatus(targetId, validationResult, extraMessage = "") {
   `;
 }
 
-function previewSasaran() {
+function renderSubmitStatus(targetId, result, successMessage) {
+  const target = $(targetId);
+  if (!target) return;
+
+  target.classList.remove("muted-panel", "success-panel", "error-panel");
+  target.classList.add(result.ok ? "success-panel" : "error-panel");
+
+  if (result.ok) {
+    target.innerHTML = `
+      <strong>${successMessage}</strong><br />
+      Status: <code>${result.status}</code><br />
+      Sheet: <code>${result.data?.sheet_name || "-"}</code><br />
+      Row: <code>${result.data?.row_number || "-"}</code><br />
+      Record ID: <code>${result.data?.record_id || "-"}</code>
+    `;
+    return;
+  }
+
+  const errorDetail = result.error?.detail;
+  const issues = Array.isArray(errorDetail?.issues) ? errorDetail.issues : [];
+  const issueHtml = issues.length
+    ? `<ul class="issue-list">${issues
+        .map((issue) => `<li><strong>${issue.field || "-"}</strong> — ${issue.message || issue.code || "Error"} <code>${issue.code || "ERROR"}</code></li>`)
+        .join("")}</ul>`
+    : "";
+
+  target.innerHTML = `
+    <strong>Pengiriman gagal.</strong><br />
+    Status: <code>${result.status || "error"}</code><br />
+    Error: <code>${result.error?.code || "UNKNOWN_ERROR"}</code><br />
+    ${result.message || result.error?.message || "Terjadi kesalahan."}
+    ${issueHtml}
+  `;
+}
+
+function buildAndValidateSasaran() {
   ensureMutationId("sasaranForm", "reg");
 
   const payload = buildSasaranPayload(mergeContextData(getFormData("sasaranForm")));
@@ -237,36 +292,119 @@ function previewSasaran() {
     reference_date: new Date().toISOString().slice(0, 10),
   });
 
+  return { payload, validation };
+}
+
+function buildAndValidatePendampingan() {
+  ensureMutationId("pendampinganForm", "pdg");
+
+  const formData = getFormData("pendampinganForm");
+  const payload = buildPendampinganPayload(mergeContextData(formData));
+  const monthlyReportContext = {
+    existing_count_for_kader_month: Number(formData.existing_count_for_kader_month || 0),
+    new_count: 1,
+  };
+  const validation = validatePendampinganPayload(payload, {
+    today: new Date(),
+    monthly_report_context: monthlyReportContext,
+  });
+
+  return { payload, validation, monthlyReportContext };
+}
+
+function previewSasaran() {
+  const { payload, validation } = buildAndValidateSasaran();
+
   renderValidationStatus("sasaranStatus", validation, "Payload belum dikirim ke backend.");
   renderJson("sasaranOutput", {
     entity: "sasaran",
     validation,
     payload,
   });
+
+  return { payload, validation };
 }
 
 function previewPendampingan() {
-  ensureMutationId("pendampinganForm", "pdg");
-
-  const formData = getFormData("pendampinganForm");
-  const payload = buildPendampinganPayload(mergeContextData(formData));
-  const validation = validatePendampinganPayload(payload, {
-    today: new Date(),
-    monthly_report_context: {
-      existing_count_for_kader_month: Number(formData.existing_count_for_kader_month || 0),
-      new_count: 1,
-    },
-  });
+  const { payload, validation, monthlyReportContext } = buildAndValidatePendampingan();
 
   renderValidationStatus("pendampinganStatus", validation, "Payload belum dikirim ke backend.");
   renderJson("pendampinganOutput", {
     entity: "pendampingan",
     validation,
     payload,
-    monthly_report_context: {
-      existing_count_for_kader_month: Number(formData.existing_count_for_kader_month || 0),
-      new_count: 1,
-    },
+    monthly_report_context: monthlyReportContext,
+  });
+
+  return { payload, validation, monthlyReportContext };
+}
+
+async function submitSasaranToSheet() {
+  const { payload, validation } = buildAndValidateSasaran();
+
+  if (!validation.ok) {
+    renderValidationStatus("sasaranStatus", validation, "Data belum dikirim karena validasi frontend gagal.");
+    renderJson("sasaranOutput", {
+      ok: false,
+      blocked_by: "frontend_validation",
+      entity: "sasaran",
+      validation,
+      payload,
+    });
+    return;
+  }
+
+  renderValidationStatus("sasaranStatus", validation, "Mengirim payload ke Apps Script + Google Sheet staging...");
+  renderJson("sasaranOutput", {
+    entity: "sasaran",
+    status: "sending",
+    payload,
+  });
+
+  const result = await backend.submitRegistrasi(payload);
+
+  renderSubmitStatus("sasaranStatus", result, "Sasaran berhasil dikirim ke Google Sheet staging.");
+  renderJson("sasaranOutput", {
+    entity: "sasaran",
+    provider: backend.getProviderName(),
+    result,
+    payload,
+  });
+}
+
+async function submitPendampinganToSheet() {
+  const { payload, validation, monthlyReportContext } = buildAndValidatePendampingan();
+
+  if (!validation.ok) {
+    renderValidationStatus("pendampinganStatus", validation, "Data belum dikirim karena validasi frontend gagal.");
+    renderJson("pendampinganOutput", {
+      ok: false,
+      blocked_by: "frontend_validation",
+      entity: "pendampingan",
+      validation,
+      payload,
+      monthly_report_context: monthlyReportContext,
+    });
+    return;
+  }
+
+  renderValidationStatus("pendampinganStatus", validation, "Mengirim payload ke Apps Script + Google Sheet staging...");
+  renderJson("pendampinganOutput", {
+    entity: "pendampingan",
+    status: "sending",
+    payload,
+    monthly_report_context: monthlyReportContext,
+  });
+
+  const result = await backend.submitPendampingan(payload);
+
+  renderSubmitStatus("pendampinganStatus", result, "Pendampingan berhasil dikirim ke Google Sheet staging.");
+  renderJson("pendampinganOutput", {
+    entity: "pendampingan",
+    provider: backend.getProviderName(),
+    result,
+    payload,
+    monthly_report_context: monthlyReportContext,
   });
 }
 
@@ -283,7 +421,7 @@ function fillSasaranSample() {
     nama_pasangan: "",
     no_hp: "",
     alamat_lengkap: "Alamat contoh backfill Tejakula",
-    catatan_backfill: "Contoh payload valid Paket 4",
+    catatan_backfill: "Contoh payload valid Paket 5",
   });
   previewSasaran();
 }
@@ -300,7 +438,7 @@ function fillPendampinganSample() {
     status_pendampingan: "KUNJUNGAN_RUMAH",
     existing_count_for_kader_month: "0",
     hasil_pendampingan: "Pendampingan contoh berhasil dilakukan.",
-    catatan_pendampingan: "Contoh payload valid Paket 4",
+    catatan_pendampingan: "Contoh payload valid Paket 5",
   });
   previewPendampingan();
 }
@@ -381,18 +519,21 @@ function deletePendampinganDraft() {
 
 function bindEvents() {
   $("checkBackendBtn")?.addEventListener("click", checkBackend);
+  $("setupSheetsBtn")?.addEventListener("click", setupStagingSheets);
   $("generateMutationBtn")?.addEventListener("click", generateMutationIds);
   $("checkContractBtn")?.addEventListener("click", checkContractLayer);
   $("checkValidationBtn")?.addEventListener("click", checkValidationLayer);
 
   $("fillSasaranSampleBtn")?.addEventListener("click", fillSasaranSample);
   $("previewSasaranBtn")?.addEventListener("click", previewSasaran);
+  $("submitSasaranBtn")?.addEventListener("click", submitSasaranToSheet);
   $("saveSasaranDraftBtn")?.addEventListener("click", saveSasaranDraft);
   $("loadSasaranDraftBtn")?.addEventListener("click", loadSasaranDraft);
   $("deleteSasaranDraftBtn")?.addEventListener("click", deleteSasaranDraft);
 
   $("fillPendampinganSampleBtn")?.addEventListener("click", fillPendampinganSample);
   $("previewPendampinganBtn")?.addEventListener("click", previewPendampingan);
+  $("submitPendampinganBtn")?.addEventListener("click", submitPendampinganToSheet);
   $("savePendampinganDraftBtn")?.addEventListener("click", savePendampinganDraft);
   $("loadPendampinganDraftBtn")?.addEventListener("click", loadPendampinganDraft);
   $("deletePendampinganDraftBtn")?.addEventListener("click", deletePendampinganDraft);
