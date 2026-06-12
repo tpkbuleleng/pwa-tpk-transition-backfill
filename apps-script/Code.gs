@@ -23,7 +23,7 @@
  * - Fallback active spreadsheet hanya untuk uji, bukan pola final 9 kecamatan.
  */
 
-const APP_BACKEND_VERSION = 'gas-backfill-router-p6-20260612-r1';
+const APP_BACKEND_VERSION = 'gas-backfill-router-p7a-r1-20260612-r1';
 
 /**
  * Paket 5-R1 menggunakan 1 Apps Script pusat sebagai ROUTER.
@@ -316,7 +316,7 @@ function handleHealthCheck_(payload, meta) {
   }
 
   return successResponse_({
-    message: 'Apps Script BACKFILL Router Paket 6 endpoint sehat.',
+    message: 'Apps Script BACKFILL Router Paket 7-A-R1 endpoint sehat.',
     data: {
       received_payload: payload || {},
       server_time: new Date().toISOString(),
@@ -1157,6 +1157,10 @@ function validatePendampinganBackend_(payload) {
     'id_tim',
     'id_kader',
     'id_wilayah',
+    'desa_kelurahan',
+    'dusun_rw',
+    'sasaran_unique_key',
+    'nama_sasaran',
     'jenis_sasaran',
     'periode_bulan',
     'tahun_laporan',
@@ -1189,8 +1193,12 @@ function validatePendampinganBackend_(payload) {
     }
   }
 
-  if (!text_(payload.id_sasaran) && !text_(payload.id_sasaran_temp)) {
-    issues.push(issue_('id_sasaran_temp', 'SASARAN_ID_REQUIRED', 'id_sasaran atau id_sasaran_temp wajib diisi.'));
+  if (!text_(payload.sasaran_unique_key) && !text_(payload.id_sasaran) && !text_(payload.id_sasaran_temp)) {
+    issues.push(issue_('sasaran_unique_key', 'SASARAN_REFERENCE_REQUIRED', 'sasaran_unique_key, id_sasaran, atau id_sasaran_temp wajib diisi.'));
+  }
+
+  if (text_(payload.nik) && !/^\d{16}$/.test(text_(payload.nik))) {
+    issues.push(issue_('nik', 'INVALID_NIK', 'NIK sasaran wajib 16 digit angka jika diisi.'));
   }
 
   return validationResult_(issues);

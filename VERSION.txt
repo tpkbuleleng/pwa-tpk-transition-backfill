@@ -1,5 +1,2 @@
-PWA TPK Kabupaten Buleleng
-Paket 7-A — Supabase Staging Schema & Import Contract
-Version: tpk-transition-p7a-20260612-r1
-Status: SQL staging contract package
-Previous baseline: Paket 6 PASS — Export CSV & Import Readiness
+tpk-transition-p7a-r1-20260612-r1
+Paket 7-A-R1 — Pendampingan Identity Binding & Import Validation Repair

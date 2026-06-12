@@ -11,14 +11,16 @@ import {
 } from "./validators.js";
 
 export function buildPendampinganUniqueKey(payload) {
-  const idSasaran = String(payload?.id_sasaran || payload?.id_sasaran_temp || "").trim();
+  const sasaranKey = String(
+    payload?.sasaran_unique_key || payload?.id_sasaran || payload?.id_sasaran_temp || "",
+  ).trim();
   const periodeBulan = String(payload?.periode_bulan || "").trim().padStart(2, "0");
   const tahunLaporan = String(payload?.tahun_laporan || "").trim();
 
   return {
-    unique_key: `${idSasaran}|${tahunLaporan}-${periodeBulan}`,
-    strategy: "id_sasaran_periode_bulan_tahun_laporan",
-    needs_review: !idSasaran,
+    unique_key: `${sasaranKey}|${tahunLaporan}-${periodeBulan}`,
+    strategy: "sasaran_unique_key_periode_bulan_tahun_laporan",
+    needs_review: !sasaranKey,
   };
 }
 

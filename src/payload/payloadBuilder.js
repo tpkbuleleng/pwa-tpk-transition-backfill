@@ -22,6 +22,20 @@ function asNumberOrBlank(value) {
   return Number.isFinite(number) ? number : text;
 }
 
+function buildPendampinganSasaranUniqueKey(formData = {}) {
+  const provided = cleanString(formData.sasaran_unique_key);
+  if (provided) return provided;
+
+  const nik = cleanString(formData.nik);
+  const idTim = toUpperValue(formData.id_tim);
+
+  if (/^\d{16}$/.test(nik) && idTim) {
+    return `${nik}|${idTim}`;
+  }
+
+  return toUpperValue(formData.id_sasaran || formData.id_sasaran_temp);
+}
+
 export function buildSharedContextPayload(formData = {}) {
   return {
     source_mode: APP_MODE,
@@ -70,7 +84,10 @@ export function buildPendampinganPayload(formData = {}) {
     ...buildSharedContextPayload(formData),
     id_sasaran: toUpperValue(formData.id_sasaran),
     id_sasaran_temp: toUpperValue(formData.id_sasaran_temp),
+    sasaran_unique_key: buildPendampinganSasaranUniqueKey(formData),
     jenis_sasaran: toUpperValue(formData.jenis_sasaran),
+    nik: cleanString(formData.nik),
+    nama_sasaran: toUpperValue(formData.nama_sasaran),
     periode_bulan: asNumberOrBlank(formData.periode_bulan),
     tahun_laporan: asNumberOrBlank(formData.tahun_laporan || "2026"),
     tanggal_pendampingan: cleanString(formData.tanggal_pendampingan),

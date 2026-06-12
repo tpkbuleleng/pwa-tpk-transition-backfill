@@ -150,7 +150,7 @@ function getCurrentRoutePayload() {
   const context = getFormData("contextForm");
 
   return {
-    requested_by: "frontend_paket_5_r1",
+    requested_by: "frontend_paket_7a_r1",
     kode_kecamatan: context.kode_kecamatan || context.id_kecamatan,
     id_kecamatan: context.id_kecamatan,
     nama_kecamatan: context.nama_kecamatan,
@@ -452,7 +452,7 @@ function fillSasaranSample() {
     nama_pasangan: "",
     no_hp: "",
     alamat_lengkap: "Alamat contoh backfill Tejakula",
-    catatan_backfill: "Contoh payload valid Paket 6",
+    catatan_backfill: "Contoh payload valid Paket 7-A-R1",
   });
   previewSasaran();
 }
@@ -460,8 +460,11 @@ function fillSasaranSample() {
 function fillPendampinganSample() {
   setFormData("pendampinganForm", {
     client_mutation_id: createClientMutationId("pdg"),
-    id_sasaran_temp: "SAS_TMP_TJK_0001",
+    id_sasaran_temp: "SAS_TMP_TJK_0004",
     id_sasaran: "",
+    nik: "5108010101010004",
+    nama_sasaran: "ANAK CONTOH 4",
+    sasaran_unique_key: "",
     jenis_sasaran: "BADUTA",
     periode_bulan: "1",
     tahun_laporan: "2026",
@@ -469,7 +472,7 @@ function fillPendampinganSample() {
     status_pendampingan: "KUNJUNGAN_RUMAH",
     existing_count_for_kader_month: "0",
     hasil_pendampingan: "Pendampingan contoh berhasil dilakukan.",
-    catatan_pendampingan: "Contoh payload valid Paket 6",
+    catatan_pendampingan: "Contoh payload valid Paket 7-A-R1",
   });
   previewPendampingan();
 }
@@ -554,7 +557,7 @@ function getExportPayload() {
   const exportData = getFormData("exportForm");
 
   return {
-    requested_by: "frontend_paket_6",
+    requested_by: "frontend_paket_7a_r1",
     kode_kecamatan: context.kode_kecamatan || context.id_kecamatan,
     id_kecamatan: context.id_kecamatan,
     nama_kecamatan: context.nama_kecamatan,

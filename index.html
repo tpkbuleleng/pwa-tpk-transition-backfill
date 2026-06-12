@@ -16,7 +16,7 @@
         </div>
 
         <h1 class="app-title">PWA TPK Kabupaten Buleleng</h1>
-        <p class="app-subtitle">Paket 7-A — Supabase Staging Schema & Import Contract</p>
+        <p class="app-subtitle">Paket 7-A-R1 — Pendampingan Identity Binding & Import Repair</p>
 
         <div class="info-grid">
           <div class="info-box">
@@ -40,7 +40,7 @@
           <div>
             <h2>Supabase Staging Schema & Import Contract</h2>
             <p class="section-description">
-              Paket 7-A belum menghubungkan frontend ke Supabase. Modul ini hanya mengunci SQL schema, tabel staging, import_batch, import_error, dan rencana validasi sebelum promote ke production.
+              Paket 7-A-R1 belum menghubungkan frontend ke Supabase. Modul ini hanya mengunci SQL schema, tabel staging, import_batch, import_error, serta penguncian identitas sasaran pada pendampingan sebelum promote ke production.
             </p>
           </div>
           <span class="stage-badge">SQL STAGING</span>
@@ -223,6 +223,18 @@
           <label>
             <span>ID Sasaran Production</span>
             <input name="id_sasaran" placeholder="Kosongkan saat backfill awal" />
+          </label>
+          <label>
+            <span>NIK Sasaran</span>
+            <input name="nik" inputmode="numeric" maxlength="16" placeholder="Untuk membentuk sasaran_unique_key" />
+          </label>
+          <label>
+            <span>Nama Sasaran</span>
+            <input name="nama_sasaran" placeholder="Wajib agar CSV pendampingan siap import" />
+          </label>
+          <label class="span-2">
+            <span>Sasaran Unique Key</span>
+            <input name="sasaran_unique_key" placeholder="Otomatis dari NIK + ID Tim jika dikosongkan" />
           </label>
           <label>
             <span>Jenis Sasaran</span>
