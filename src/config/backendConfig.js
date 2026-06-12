@@ -11,7 +11,7 @@ export const BACKEND_CONFIG = Object.freeze({
      * Contoh:
      * https://script.google.com/macros/s/XXXXX/exec
      */
-    gasWebAppUrl: "https://script.google.com/macros/s/AKfycbzQTAZ3pP_JmrpEFEzcOuoszk3JAMuutQl8Ip7dIBKHEXkYSMQvtsKKiJkQvW6JUb3t/exec",
+    gasWebAppUrl: "https://script.google.com/macros/s/AKfycbwiI3n1CY6rIHdeG1S-nuM8vZHdiDC4Dcuxj4AgIdYXrPQEfEktGtSNdVRQ4_TSbtPa-A/exec",
 
     timeoutMs: 30000,
   },
