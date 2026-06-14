@@ -24,6 +24,7 @@ import { buildPendampinganPayload, buildSasaranPayload } from "./payload/payload
 import { deleteDraft, DRAFT_KEYS, loadDraft, saveDraft } from "./storage/draftStorage.js";
 import { getSupabaseStagingContractSummary } from "./supabase/stagingContract.js";
 import { getSupabasePromoteDryRunContractSummary } from "./supabase/promoteDryRunContract.js";
+import { getSupabaseProductionPromoteContractSummary } from "./supabase/productionPromoteContract.js";
 
 function $(id) {
   return document.getElementById(id);
@@ -652,6 +653,10 @@ function checkSupabasePromoteDryRunContract() {
   renderJson("supabasePromoteDryRunOutput", getSupabasePromoteDryRunContractSummary());
 }
 
+function checkSupabaseProductionPromoteContract() {
+  renderJson("supabaseProductionPromoteOutput", getSupabaseProductionPromoteContractSummary());
+}
+
 function bindEvents() {
   $("checkBackendBtn")?.addEventListener("click", checkBackend);
   $("checkRouteBtn")?.addEventListener("click", checkWorkbookRoute);
@@ -663,6 +668,7 @@ function bindEvents() {
   $("exportCsvBtn")?.addEventListener("click", exportCsv);
   $("checkSupabaseStagingContractBtn")?.addEventListener("click", checkSupabaseStagingContract);
   $("checkSupabasePromoteDryRunContractBtn")?.addEventListener("click", checkSupabasePromoteDryRunContract);
+  $("checkSupabaseProductionPromoteContractBtn")?.addEventListener("click", checkSupabaseProductionPromoteContract);
 
   $("fillSasaranSampleBtn")?.addEventListener("click", fillSasaranSample);
   $("previewSasaranBtn")?.addEventListener("click", previewSasaran);
