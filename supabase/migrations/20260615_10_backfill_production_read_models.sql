@@ -2,7 +2,7 @@
 -- PWA TPK Kabupaten Buleleng
 -- Paket 7-D — Production Read Model & Basic Query Layer
 -- File 01: Production read models
--- Version: p7d-20260615-r1
+-- Version: p7d-r1-20260615-kecamatan-summary-fix
 -- ============================================================
 
 -- ============================================================
@@ -204,7 +204,7 @@ select
   id_kecamatan,
   kode_kecamatan,
   nama_kecamatan,
-  count(distinct id_tim) filter (where is_deleted = false) as total_tim,
+  count(distinct id_tim) filter (where coalesce(total_sasaran, 0) > 0) as total_tim,
   sum(total_sasaran)::bigint as total_sasaran,
   sum(total_catin)::bigint as total_catin,
   sum(total_bumil)::bigint as total_bumil,

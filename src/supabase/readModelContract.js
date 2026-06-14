@@ -77,6 +77,6 @@ export function getSupabaseReadModelContractSummary() {
       "select public.get_production_basic_summary('TJK', 'TIM_TJK_001');",
       "select public.check_production_read_model_health();",
     ],
-    next_package: "Paket 7-E — Supabase Auth & RLS Role Model Preparation",
+    next_package: "Paket 7-E — Production Master Reference & Scope Foundation",
   };
 }

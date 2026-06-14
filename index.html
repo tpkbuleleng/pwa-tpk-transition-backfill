@@ -16,7 +16,7 @@
         </div>
 
         <h1 class="app-title">PWA TPK Kabupaten Buleleng</h1>
-        <p class="app-subtitle">Paket 7-D — Production Read Model & Basic Query Layer</p>
+        <p class="app-subtitle">Paket 7-E — Production Master Reference & Scope Foundation</p>
 
         <div class="info-grid">
           <div class="info-box">
@@ -40,7 +40,7 @@
           <div>
             <h2>Supabase Staging Schema & Import Contract</h2>
             <p class="section-description">
-              Paket 7-D mempertahankan kontrak staging dari Paket 7-A, dry-run Paket 7-B, dan production base Paket 7-C sambil menambahkan read model dasar.
+              Paket 7-E mempertahankan kontrak staging, dry-run, production base, dan read model sambil menambahkan master reference serta fondasi scope.
             </p>
           </div>
           <span class="stage-badge">SQL STAGING</span>
@@ -120,9 +120,29 @@
       </section>
 
       <section class="card">
+        <div class="section-header-row">
+          <div>
+            <h2>Supabase Master Reference & Scope Foundation Contract</h2>
+            <p class="section-description">
+              Modul ini menjelaskan master kecamatan, tim, kader, wilayah, scope profile, refresh reference dari production base, serta binding read model ke referensi resmi.
+            </p>
+          </div>
+          <span class="stage-badge">MASTER REF</span>
+        </div>
+
+        <div class="button-row">
+          <button id="checkSupabaseMasterReferenceContractBtn" type="button" class="primary-button">
+            Cek Supabase Master Reference Contract
+          </button>
+        </div>
+
+        <pre id="supabaseMasterReferenceOutput" class="output-box compact-output">Belum ada hasil.</pre>
+      </section>
+
+      <section class="card">
         <h2>Status Backend</h2>
         <p class="section-description">
-          Tombol ini memastikan UI tetap memanggil backend melalui kontrak provider. Jalur BACKFILL Apps Script + Google Sheet tetap stabil, sementara Paket 7-D menambah kontrak read model Supabase.
+          Tombol ini memastikan UI tetap memanggil backend melalui kontrak provider. Jalur BACKFILL Apps Script + Google Sheet tetap stabil, sementara Paket 7-E menambah master reference dan scope foundation Supabase.
         </p>
 
         <div class="button-row">

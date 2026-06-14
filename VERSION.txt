@@ -1,3 +1,1 @@
-tpk-transition-p7d-20260615-r1
-Paket 7-D — Production Read Model & Basic Query Layer
-
+tpk-transition-p7e-20260615-r1
