@@ -1,3 +1,2 @@
-tpk-transition-p7c-20260614-r1
-Paket 7-C — Production Base Tables & Controlled Promote
-
+tpk-transition-p7d-20260615-r1
+Paket 7-D — Production Read Model & Basic Query Layer

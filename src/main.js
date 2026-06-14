@@ -25,6 +25,7 @@ import { deleteDraft, DRAFT_KEYS, loadDraft, saveDraft } from "./storage/draftSt
 import { getSupabaseStagingContractSummary } from "./supabase/stagingContract.js";
 import { getSupabasePromoteDryRunContractSummary } from "./supabase/promoteDryRunContract.js";
 import { getSupabaseProductionPromoteContractSummary } from "./supabase/productionPromoteContract.js";
+import { getSupabaseReadModelContractSummary } from "./supabase/readModelContract.js";
 
 function $(id) {
   return document.getElementById(id);
@@ -152,7 +153,7 @@ function getCurrentRoutePayload() {
   const context = getFormData("contextForm");
 
   return {
-    requested_by: "frontend_paket_7b",
+    requested_by: "frontend_paket_7d",
     kode_kecamatan: context.kode_kecamatan || context.id_kecamatan,
     id_kecamatan: context.id_kecamatan,
     nama_kecamatan: context.nama_kecamatan,
@@ -454,7 +455,7 @@ function fillSasaranSample() {
     nama_pasangan: "",
     no_hp: "",
     alamat_lengkap: "Alamat contoh backfill Tejakula",
-    catatan_backfill: "Contoh payload valid Paket 7-B",
+    catatan_backfill: "Contoh payload valid Paket 7-D",
   });
   previewSasaran();
 }
@@ -474,7 +475,7 @@ function fillPendampinganSample() {
     status_pendampingan: "KUNJUNGAN_RUMAH",
     existing_count_for_kader_month: "0",
     hasil_pendampingan: "Pendampingan contoh berhasil dilakukan.",
-    catatan_pendampingan: "Contoh payload valid Paket 7-B",
+    catatan_pendampingan: "Contoh payload valid Paket 7-D",
   });
   previewPendampingan();
 }
@@ -559,7 +560,7 @@ function getExportPayload() {
   const exportData = getFormData("exportForm");
 
   return {
-    requested_by: "frontend_paket_7b",
+    requested_by: "frontend_paket_7d",
     kode_kecamatan: context.kode_kecamatan || context.id_kecamatan,
     id_kecamatan: context.id_kecamatan,
     nama_kecamatan: context.nama_kecamatan,
@@ -657,6 +658,10 @@ function checkSupabaseProductionPromoteContract() {
   renderJson("supabaseProductionPromoteOutput", getSupabaseProductionPromoteContractSummary());
 }
 
+function checkSupabaseReadModelContract() {
+  renderJson("supabaseReadModelOutput", getSupabaseReadModelContractSummary());
+}
+
 function bindEvents() {
   $("checkBackendBtn")?.addEventListener("click", checkBackend);
   $("checkRouteBtn")?.addEventListener("click", checkWorkbookRoute);
@@ -669,6 +674,7 @@ function bindEvents() {
   $("checkSupabaseStagingContractBtn")?.addEventListener("click", checkSupabaseStagingContract);
   $("checkSupabasePromoteDryRunContractBtn")?.addEventListener("click", checkSupabasePromoteDryRunContract);
   $("checkSupabaseProductionPromoteContractBtn")?.addEventListener("click", checkSupabaseProductionPromoteContract);
+  $("checkSupabaseReadModelContractBtn")?.addEventListener("click", checkSupabaseReadModelContract);
 
   $("fillSasaranSampleBtn")?.addEventListener("click", fillSasaranSample);
   $("previewSasaranBtn")?.addEventListener("click", previewSasaran);

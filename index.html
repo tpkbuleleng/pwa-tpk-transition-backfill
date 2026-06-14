@@ -16,7 +16,7 @@
         </div>
 
         <h1 class="app-title">PWA TPK Kabupaten Buleleng</h1>
-        <p class="app-subtitle">Paket 7-C — Production Base Tables & Controlled Promote</p>
+        <p class="app-subtitle">Paket 7-D — Production Read Model & Basic Query Layer</p>
 
         <div class="info-grid">
           <div class="info-box">
@@ -40,7 +40,7 @@
           <div>
             <h2>Supabase Staging Schema & Import Contract</h2>
             <p class="section-description">
-              Paket 7-C mempertahankan kontrak staging dari Paket 7-A dan menambahkan controlled promote dari dry-run ke tabel production base tanpa mengaktifkan frontend production penuh.
+              Paket 7-D mempertahankan kontrak staging dari Paket 7-A, dry-run Paket 7-B, dan production base Paket 7-C sambil menambahkan read model dasar.
             </p>
           </div>
           <span class="stage-badge">SQL STAGING</span>
@@ -97,10 +97,32 @@
         <pre id="supabaseProductionPromoteOutput" class="output-box compact-output">Belum ada hasil.</pre>
       </section>
 
+
+
+      <section class="card">
+        <div class="section-header-row">
+          <div>
+            <h2>Supabase Production Read Model & Basic Query Contract</h2>
+            <p class="section-description">
+              Modul ini menjelaskan read model production dasar untuk sasaran, pendampingan, ringkasan tim/kecamatan, serta query function yang belum dibuka untuk frontend publik.
+            </p>
+          </div>
+          <span class="stage-badge">READ MODEL</span>
+        </div>
+
+        <div class="button-row">
+          <button id="checkSupabaseReadModelContractBtn" type="button" class="primary-button">
+            Cek Supabase Read Model Contract
+          </button>
+        </div>
+
+        <pre id="supabaseReadModelOutput" class="output-box compact-output">Belum ada hasil.</pre>
+      </section>
+
       <section class="card">
         <h2>Status Backend</h2>
         <p class="section-description">
-          Tombol ini memastikan UI tetap memanggil backend melalui kontrak provider dan dapat menyiapkan Google Sheet staging melalui router workbook dan export CSV Paket 6, sambil menyiapkan kontrak Supabase staging Paket 7-A.
+          Tombol ini memastikan UI tetap memanggil backend melalui kontrak provider. Jalur BACKFILL Apps Script + Google Sheet tetap stabil, sementara Paket 7-D menambah kontrak read model Supabase.
         </p>
 
         <div class="button-row">
@@ -128,7 +150,7 @@
       <section class="card">
         <h2>Data Konteks Kader / Tim</h2>
         <p class="section-description">
-          Untuk Paket 6, kode kecamatan tetap dipakai router pusat untuk menentukan workbook tujuan. Data konteks masih diisi manual agar export CSV bisa diuji tanpa login penuh.
+          Kode kecamatan tetap dipakai router pusat untuk menentukan workbook tujuan. Data konteks masih diisi manual agar alur BACKFILL bisa diuji tanpa login penuh.
         </p>
 
         <form id="contextForm" class="form-grid" autocomplete="off">
@@ -373,12 +395,12 @@
       </section>
 
       <section class="note-card">
-        <h2>Catatan Paket 7-C</h2>
+        <h2>Catatan Paket 7-D</h2>
         <ul>
-          <li>Paket 7-C mulai membuat tabel production base: sasaran dan pendampingan.</li>
-          <li>Controlled promote hanya mengambil data dari dryrun_sasaran dan dryrun_pendampingan yang sudah lolos Paket 7-B.</li>
-          <li>Relasi pendampingan ke sasaran di production base dikunci melalui sasaran_id.</li>
-          <li>Frontend production, Supabase Auth, dan RLS role kader belum diaktifkan pada paket ini.</li>
+          <li>Paket 7-D menambahkan read model production dasar: v_sasaran_lite, v_pendampingan_lite, dan summary basic.</li>
+          <li>Read model mengambil data dari public.sasaran dan public.pendampingan yang sudah lolos controlled promote Paket 7-C.</li>
+          <li>Query layer dasar disiapkan melalui function query_sasaran_lite(), query_pendampingan_lite(), dan get_production_basic_summary().</li>
+          <li>Frontend production, Supabase Auth, dan RLS role kader tetap belum diaktifkan pada paket ini.</li>
           <li>Service worker masih belum diaktifkan agar uji GitHub Pages tidak tertahan cache.</li>
         </ul>
       </section>

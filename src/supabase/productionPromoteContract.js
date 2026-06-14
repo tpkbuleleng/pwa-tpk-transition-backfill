@@ -64,6 +64,6 @@ export function getSupabaseProductionPromoteContractSummary() {
       "select public.promote_backfill_dryrun_to_production('IMPB_...', 'pendampingan', false);",
       "select public.purge_backfill_production_promote(null, 'IMPB_...', false);"
     ],
-    next_package: "Paket 7-D — Supabase Auth, RLS Role Model & Provider Activation Plan",
+    next_package: "Paket 7-D — Production Read Model & Basic Query Layer",
   };
 }
