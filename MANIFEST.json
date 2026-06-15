@@ -1,61 +1,16 @@
 {
-  "package": "Paket 7-F — Production Query Contract & Frontend Readiness",
-  "generated_at": "2026-06-14T23:56:24.103111Z",
+  "package": "Paket 7-F-R1",
+  "name": "JSONB Filter Overload Patch",
+  "project": "PWA TPK Kabupaten Buleleng",
   "files": [
-    {
-      "path": "docs/API_CONTRACT_7F.md",
-      "bytes": 2653,
-      "sha256": "119b8301e4a901ea49ad28d3cea3cbc99e3bc49b4d3b0657e029f113709a34e8"
-    },
-    {
-      "path": "docs/IMPLEMENTATION_CHECKLIST_7F.md",
-      "bytes": 1228,
-      "sha256": "28d1f75729ce971ff15237e324b96bc6467c1099d75655c402f536428320b2d5"
-    },
-    {
-      "path": "docs/PASS_CRITERIA_7F.md",
-      "bytes": 804,
-      "sha256": "da789672da8edda4fc54a0fcf9d59b7975f59dc3d3039c9a0df424dd5720e105"
-    },
-    {
-      "path": "docs/README_PAKET_7F.md",
-      "bytes": 3041,
-      "sha256": "30639a8d04c27dcea0937031d8294ffe44af53d259d11e4fa0d48b12f9bc46f2"
-    },
-    {
-      "path": "sql/01_query_contract_rpc_7f.sql",
-      "bytes": 12723,
-      "sha256": "d3ad9a1a5f1a12dc2af53ae7cbb6b4246bb1a0006b7f1d70f3ab86fc29c22343"
-    },
-    {
-      "path": "sql/02_smoke_test_query_contract_7f.sql",
-      "bytes": 2132,
-      "sha256": "136ace9cdb637dcd9e65c83050a4c35791fa3ae6c50747786ea0ded00c29d66e"
-    },
-    {
-      "path": "src/contracts/BackendProviderContract7F.js",
-      "bytes": 1042,
-      "sha256": "ff6b835803c4f57107805b4579aed6d4daa2782654bcfa2e361f7d58635239ae"
-    },
-    {
-      "path": "src/contracts/productionQueryContract7F.js",
-      "bytes": 3460,
-      "sha256": "2cf01619d4f6523e9478a5329f854b6c67f9e83c78cc7e7e4bfe09ef1869b5bd"
-    },
-    {
-      "path": "src/providers/SupabaseProviderQuery7F.placeholder.js",
-      "bytes": 2520,
-      "sha256": "6a782a96ed62bcb98a0851c9cf69c3c51973a55a6f52c86e54aefbe5c8538bfa"
-    },
-    {
-      "path": "src/services/ProductionReadService7F.js",
-      "bytes": 1439,
-      "sha256": "6f6f0b737867803b6f6a0a7da23ba256d399d29a4003b2925f1ac4f43f7da9b4"
-    },
-    {
-      "path": "tests/frontend_contract_smoke_7f.js",
-      "bytes": 1497,
-      "sha256": "0188041424bafb8e03c93fc393431df534ed49cb1d37953d92bc34dda1a0c11b"
-    }
+    "sql/03_query_contract_jsonb_overload_7f_r1.sql",
+    "sql/04_smoke_test_jsonb_overload_7f_r1.sql",
+    "docs/README_PATCH_7F_R1_JSONB_OVERLOAD.md"
+  ],
+  "changes": [
+    "Add query_sasaran_lite_7f(jsonb) overload",
+    "Add query_pendampingan_lite_7f(jsonb) overload",
+    "Keep positional RPC functions unchanged",
+    "No RLS/policy/table/data changes"
   ]
 }
