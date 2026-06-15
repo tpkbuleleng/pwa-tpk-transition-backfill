@@ -1,16 +1,42 @@
 {
-  "package": "Paket 7-F-R1",
-  "name": "JSONB Filter Overload Patch",
-  "project": "PWA TPK Kabupaten Buleleng",
-  "files": [
-    "sql/03_query_contract_jsonb_overload_7f_r1.sql",
-    "sql/04_smoke_test_jsonb_overload_7f_r1.sql",
-    "docs/README_PATCH_7F_R1_JSONB_OVERLOAD.md"
+  "package": "Paket 7-G — Production Import Batch Finalization & Selective Export Bridge",
+  "version": "TPK_IMPORT_BRIDGE_2026_7G",
+  "depends_on": [
+    "TPK_TAXONOMY_2026_7E_R1",
+    "TPK_QUERY_CONTRACT_2026_7F"
   ],
-  "changes": [
-    "Add query_sasaran_lite_7f(jsonb) overload",
-    "Add query_pendampingan_lite_7f(jsonb) overload",
-    "Keep positional RPC functions unchanged",
-    "No RLS/policy/table/data changes"
-  ]
+  "safe_defaults": {
+    "does_not_touch_backendConfig": true,
+    "does_not_touch_Code_gs": true,
+    "does_not_change_auth_rls_policy": true,
+    "does_not_activate_supabase_provider": true,
+    "does_not_delete_rows": true
+  },
+  "files": {
+    "docs": [
+      "README_PAKET_7G.md",
+      "SELECTIVE_EXPORT_CONTRACT_7G.md",
+      "IMPORT_FINALIZATION_CONTRACT_7G.md",
+      "IMPLEMENTATION_CHECKLIST_7G.md",
+      "PASS_CRITERIA_7G.md"
+    ],
+    "sql": [
+      "01_import_batch_finalization_7g.sql",
+      "02_selective_export_bridge_log_7g.sql",
+      "03_smoke_test_7g.sql",
+      "04_optional_finalize_existing_batch_7g.sql"
+    ],
+    "apps_script": [
+      "SelectiveExportBridge_7G.gs",
+      "README_DEPLOY_APPS_SCRIPT_7G.md"
+    ],
+    "frontend_contracts": [
+      "src/contracts/selectiveExportContract7G.js",
+      "src/contracts/importBatchFinalizationContract7G.js",
+      "src/services/BackfillExportBridgeService7G.js"
+    ],
+    "tests": [
+      "tests/frontend_contract_smoke_7g.js"
+    ]
+  }
 }
